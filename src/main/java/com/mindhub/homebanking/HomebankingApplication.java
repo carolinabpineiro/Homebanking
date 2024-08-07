@@ -20,6 +20,7 @@ public class HomebankingApplication {
 			// save a couple of clients
 			repository.save(new Client("Mabel", "Morel", "melba@mindhub.com"));
 			repository.save(new Client("Thomas", "Maldonado", "totomaldopi@gmail.com"));
+			repository.save(new Client("Dina", "Orta", "dinao@gmail.com"));
 
 		};
 	}
