@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 
 @Entity
@@ -17,7 +18,7 @@ public class Client {
     private String email;
 
     @OneToMany (mappedBy ="owner", fetch = FetchType.EAGER)
-    Set <Account> accounts = new HashSet<>();
+    Set<Account> accounts = new HashSet<>();
 
     // Constructor vacío para JPA
     public Client() {
@@ -68,6 +69,24 @@ public class Client {
         this.email = email;
     }
 
-    public Optional<Object> getAccounts() {
+    public Set<Account> getAccounts() {
+        return accounts;
+    }
+
+    public void SetAccounts(Set<Account> accounts) {this.accounts = accounts;}
+
+    @Override
+    public String toString() {
+        return "Client{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", accounts=" + accounts +
+                '}';
+        }
+    public void addAccount(Account account) {
+        account.setOwner(this);
+        accounts.add(account);
     }
 }
