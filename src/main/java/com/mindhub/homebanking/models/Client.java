@@ -86,7 +86,7 @@ public class Client {
                 '}';
         }
     public void addAccount(Account account) {
-        account.setOwner(this);
+        account.setClient(this);
         accounts.add(account);
     }
 }
