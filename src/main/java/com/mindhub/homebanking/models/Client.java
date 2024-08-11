@@ -17,8 +17,12 @@ public class Client {
     private String lastName;
     private String email;
 
-    @OneToMany (mappedBy ="owner", fetch = FetchType.EAGER)
+    @OneToMany (mappedBy ="client", fetch = FetchType.EAGER)
     Set<Account> accounts = new HashSet<>();
+
+    @OneToMany(mappedBy = "client", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<ClientLoan> clientLoans = new HashSet<>();
+
 
     // Constructor vacío para JPA
     public Client() {
@@ -73,7 +77,15 @@ public class Client {
         return accounts;
     }
 
-    public void SetAccounts(Set<Account> accounts) {this.accounts = accounts;}
+    public Set<ClientLoan> getClientLoans() {
+        return clientLoans;
+    }
+
+    public void setClientLoans(Set<ClientLoan> clientLoans) {
+        this.clientLoans = clientLoans;
+    }
+
+    public void setAccounts(Set<Account> accounts) {this.accounts = accounts;}
 
     @Override
     public String toString() {
@@ -83,10 +95,16 @@ public class Client {
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
                 ", accounts=" + accounts +
+                ", clientLoans=" + clientLoans +
                 '}';
-        }
+    }
+
     public void addAccount(Account account) {
         account.setClient(this);
         accounts.add(account);
+    }
+    public void addClientLoan(ClientLoan clientLoan) {
+        clientLoan.setClient(this);
+        clientLoans.add(clientLoan);
     }
 }
