@@ -18,11 +18,14 @@ public class Client {
     private String lastName;
     private String email;
 
-    @OneToMany (mappedBy ="client", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "pepe", fetch = FetchType.EAGER)
     Set<Account> accounts = new HashSet<>();
 
     @OneToMany(mappedBy = "client", fetch = FetchType.EAGER)
     private Set<ClientLoan> clientLoans = new HashSet<>();
+
+    @OneToMany(mappedBy = "client", fetch = FetchType.EAGER)
+    private Set<Card> cards = new HashSet<>();
 
 
     // Constructor vacío para JPA
@@ -82,8 +85,11 @@ public class Client {
         this.clientLoans = clientLoans;
     }
 
-    public void setAccounts(Set<Account> accounts) {this.accounts = accounts;}
+    public void setAccounts(Set<Account> accounts) {
+        this.accounts = accounts;
+    }
 
+    //Metodos
     @Override
     public String toString() {
         return "Client{" +
@@ -97,11 +103,16 @@ public class Client {
     }
 
     public void addAccount(Account account) {
-        account.setClient(this);
+        account.setPepe(this);
         accounts.add(account);
     }
+
     public void addClientLoan(ClientLoan clientLoan) {
         clientLoan.setClient(this);
         clientLoans.add(clientLoan);
+    }
+
+    public Set<Card> getCards() {
+        return cards;
     }
 }
