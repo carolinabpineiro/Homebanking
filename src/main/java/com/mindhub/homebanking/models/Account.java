@@ -88,7 +88,6 @@ public class Account {
                 ", number='" + number + '\'' +
                 ", balance=" + balance +
                 ", creationDate=" + creationDate +
-                ", client=" + client +
                 ", transactions=" + transactions +
                 '}';
     }
