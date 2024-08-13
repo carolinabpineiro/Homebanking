@@ -11,18 +11,22 @@ import java.time.LocalDateTime;
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;
+
+        @Enumerated(EnumType.STRING) //Para que el tipo de dato sea de tipo String
         private TransactionType type;
+
         private Double amount;
         private String description;
-        private LocalDate date;
+        private LocalDateTime date;
 
         @ManyToOne
         @JoinColumn(name = "account_id")
         private Account account;
 
+        //Constructor sin parametros requerido por JPA
         public Transaction() {}
 
-        public Transaction(TransactionType type, Double amount, String description, LocalDate date, Account account) {
+        public Transaction(TransactionType type, Double amount, String description, LocalDateTime date, Account account) {
             this.type = type;
             this.amount = amount;
             this.description = description;
@@ -63,11 +67,11 @@ import java.time.LocalDateTime;
             this.description = description;
         }
 
-        public LocalDate getDate() {
+        public LocalDateTime getDate() {
             return date;
         }
 
-        public void setDate(LocalDate date) {
+        public void setDate(LocalDateTime date) {
             this.date = date;
         }
 
