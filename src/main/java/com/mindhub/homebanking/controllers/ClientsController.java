@@ -41,9 +41,13 @@ public class ClientsController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Client> getClientById(@PathVariable Long id) {
-        Optional<Client> client = clientRepository.findById(id);
-        return client.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<?> getClient(@PathVariable Long id) {
+        Optional<Client> clientById = clientRepository.findById(id);
+        if (clientById.isEmpty()) {
+            return new ResponseEntity<>("Client not found with id " + id, HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(new ClientDTO(clientById.get()), HttpStatus.OK);
     }
 
 

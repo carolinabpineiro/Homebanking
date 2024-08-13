@@ -67,5 +67,16 @@ public class Loan {
         this.clientLoans.add(clientLoan); //lista de prestamos asociada al cliente, el add agrega el objeto clientLoan a la lista de prestamos
         clientLoan.setLoan(this); //el setLoan establece la relacion entre la entidad loan y el objeto clientLoan. bidireccional, ClientLoan sabe a q Loan pertenece y al reves
     }
+
+    @Override
+    public String toString() {
+        return "Loan{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", maxAmount=" + maxAmount +
+                ", payments=" + payments +
+                ", clientLoans=" + clientLoans +
+                '}';
+    }
 }
 

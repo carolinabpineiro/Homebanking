@@ -12,13 +12,14 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String number;
     private double balance;
     private LocalDateTime creationDate;
 
     @ManyToOne(fetch = FetchType.EAGER) //Hay dos tipos de Fetch: LAZY y EAGER (Le estamos diciendo que traiga todo lo que en esta relacion le estamos definiendo.
     @JoinColumn(name = "client_id") //Para ponerle el nombre que yo quiero a esa columna.
-    private Client client;
+    private Client pepe;
 
     @OneToMany(mappedBy = "account", fetch = FetchType.EAGER) //Todas las relaciones son de los dos lados. Va a buscar el nombre de esta propiedad en el muchos en el que lo quiera asociar.
     private Set<Transaction> transactions = new HashSet<>();
@@ -62,12 +63,12 @@ public class Account {
         this.creationDate = creationDate;
     }
 
-    public Client getClient() {
-        return client;
+    public Client getPepe() {
+        return pepe;
     }
 
-    public void setClient(Client client) {
-        this.client = client;
+    public void setPepe(Client pepe) {
+        this.pepe = pepe;
     }
 
     public void addTransaction(Transaction transaction) {
@@ -88,7 +89,6 @@ public class Account {
                 ", number='" + number + '\'' +
                 ", balance=" + balance +
                 ", creationDate=" + creationDate +
-                ", client=" + client +
                 ", transactions=" + transactions +
                 '}';
     }

@@ -82,5 +82,16 @@ import java.time.LocalDateTime;
         public void setAccount(Account account) {
             this.account = account;
         }
+
+        @Override
+        public String toString() {
+            return "Transaction{" +
+                    "date=" + date +
+                    ", description='" + description + '\'' +
+                    ", amount=" + amount +
+                    ", type=" + type +
+                    ", id=" + id +
+                    '}';
+        }
     }
 
