@@ -23,39 +23,24 @@ public class ClientLoanDTO {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public Long getLoanId() {
         return loanId;
     }
 
-    public void setLoanId(Long loanId) {
-        this.loanId = loanId;
-    }
 
     public String getLoanName() {
         return loanName;
     }
 
-    public void setLoanName(String loanName) {
-        this.loanName = loanName;
-    }
 
     public double getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
-        this.amount = amount;
-    }
 
     public int getPayments() {
         return payments;
     }
 
-    public void setPayments(int payments) {
-        this.payments = payments;
-    }
 }

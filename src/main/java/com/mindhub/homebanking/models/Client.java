@@ -7,12 +7,13 @@ import java.util.Optional;
 import java.util.Set;
 
 
-@Entity
+@Entity //Se crea la tabla en la base de datos
 public class Client {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
     private String firstName;
     private String lastName;
     private String email;
@@ -20,7 +21,7 @@ public class Client {
     @OneToMany (mappedBy ="client", fetch = FetchType.EAGER)
     Set<Account> accounts = new HashSet<>();
 
-    @OneToMany(mappedBy = "client", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "client", fetch = FetchType.EAGER)
     private Set<ClientLoan> clientLoans = new HashSet<>();
 
 
@@ -35,10 +36,6 @@ public class Client {
         this.email = email;
     }
 
-    // Constructor alternativo
-    public Client(String firstName, String lastName) {
-        this(firstName, lastName, ""); // Llama al constructor con parámetros
-    }
 
     // Getters y Setters
     public long getId() {

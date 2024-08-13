@@ -3,6 +3,7 @@ package com.mindhub.homebanking.models;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,24 +14,24 @@ public class Account {
     private Long id;
     private String number;
     private double balance;
-    private LocalDate creationDate;
+    private LocalDateTime creationDate;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "client_id")
+    @ManyToOne(fetch = FetchType.EAGER) //Hay dos tipos de Fetch: LAZY y EAGER (Le estamos diciendo que traiga todo lo que en esta relacion le estamos definiendo.
+    @JoinColumn(name = "client_id") //Para ponerle el nombre que yo quiero a esa columna.
     private Client client;
 
-    @OneToMany(mappedBy = "account", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "account", fetch = FetchType.EAGER) //Todas las relaciones son de los dos lados. Va a buscar el nombre de esta propiedad en el muchos en el que lo quiera asociar.
     private Set<Transaction> transactions = new HashSet<>();
 
 
     public Account() {
     }
 
-    public Account(String number, double balance, LocalDate creationDate, Client client) {
+    public Account(String number, double balance, LocalDateTime creationDate) {
         this.number = number;
         this.balance = balance;
         this.creationDate = creationDate;
-        this.client = client;
+
     }
 
     public Long getId() {
@@ -53,11 +54,11 @@ public class Account {
         this.balance = balance;
     }
 
-    public LocalDate getCreationDate() {
+    public LocalDateTime getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(LocalDate creationDate) {
+    public void setCreationDate(LocalDateTime creationDate) {
         this.creationDate = creationDate;
     }
 
@@ -69,6 +70,17 @@ public class Account {
         this.client = client;
     }
 
+    public void addTransaction(Transaction transaction) {
+        transactions.add(transaction);
+        transaction.setAccount(this);
+    }
+
+
+
+    public Set<Transaction> getTransactions() {
+        return transactions;
+    }
+
     @Override
     public String toString() {
         return "Account{" +
@@ -76,11 +88,9 @@ public class Account {
                 ", number='" + number + '\'' +
                 ", balance=" + balance +
                 ", creationDate=" + creationDate +
+                ", client=" + client +
+                ", transactions=" + transactions +
                 '}';
-    }
-
-    public Set<Transaction> getTransactions() {
-        return transactions;
     }
 }
 
