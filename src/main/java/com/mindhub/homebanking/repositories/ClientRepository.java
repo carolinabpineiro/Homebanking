@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository //Anotacion para que funcioine como respositorio, y se la considerara como a una base de datos
 public interface ClientRepository extends JpaRepository<Client,Long> {
+    Client findByEmail(String username);
 }

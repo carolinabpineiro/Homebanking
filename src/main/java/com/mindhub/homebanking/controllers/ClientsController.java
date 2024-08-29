@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
-@RestController //Escucha peticiones especificas
-@RequestMapping("/api/clients") //Define ruta de acceso a este controlador
-
+@RestController
+@RequestMapping("/api/clients")
 public class ClientsController {
 
     @Autowired
@@ -30,14 +30,12 @@ public class ClientsController {
         return "Hello Clients";
     }
 
-
-
     @GetMapping
     public List<ClientDTO> getAllClients() {
-        return clientRepository.findAll()//lista de todos los clientes en la base de datos
+        return clientRepository.findAll()
                 .stream()
-                .map(client -> new ClientDTO(client))
-                .collect(toList());
+                .map(ClientDTO::new)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
@@ -50,34 +48,45 @@ public class ClientsController {
         return new ResponseEntity<>(new ClientDTO(clientById.get()), HttpStatus.OK);
     }
 
+    @PostMapping("/create")
+    public ResponseEntity<?> createClient(@RequestBody ClientDTO clientDTO) {
+        if (clientDTO.getFirstName().isBlank() || clientDTO.getLastName().isBlank() || clientDTO.getEmail().isBlank()) {
+            return new ResponseEntity<>("All fields are required", HttpStatus.BAD_REQUEST);
+        }
 
-    //crud crear cliente
-    @PostMapping("/create")  //tipo post para crear un cliente
-    public Client createClient(@RequestParam String firstName, @RequestParam String lastName, @RequestParam String email) {  //request param le dice a spring que solicito ese parametro
-        return clientRepository.save(new Client(firstName, lastName, email)); //validar q no sean string vacios, if first name.isBlank() return false
+        // Suponiendo que la contraseña no está en ClientDTO, deberías definirla aquí.
+        String defaultPassword = "defaultPassword"; // Cambia esto según tu lógica de seguridad.
+
+        Client client = new Client(clientDTO.getFirstName(), clientDTO.getLastName(), clientDTO.getEmail(), defaultPassword);
+        Client savedClient = clientRepository.save(client);
+        return new ResponseEntity<>(new ClientDTO(savedClient), HttpStatus.CREATED);
     }
 
-    //crud para actualizar un cliente
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateClient(@PathVariable Long id, @RequestParam String firstName, @RequestParam String lastName, @RequestParam String email) {
+    public ResponseEntity<?> updateClient(@PathVariable Long id, @RequestBody ClientDTO clientDTO) {
         Client client = clientRepository.findById(id).orElse(null);
         if (client == null) {
             return new ResponseEntity<>("Client not found with id " + id, HttpStatus.NOT_FOUND);
         }
-        client.setFirstName(firstName);
-        client.setLastName(lastName);
-        client.setEmail(email);
 
-        Client updatedClient = clientRepository.save(client);  //sobreescribo el cliente que ya tenia
-        return new ResponseEntity<>(updatedClient, HttpStatus.OK);
+        if (clientDTO.getFirstName() != null && !clientDTO.getFirstName().isBlank()) {
+            client.setFirstName(clientDTO.getFirstName());
+        }
+        if (clientDTO.getLastName() != null && !clientDTO.getLastName().isBlank()) {
+            client.setLastName(clientDTO.getLastName());
+        }
+        if (clientDTO.getEmail() != null && !clientDTO.getEmail().isBlank()) {
+            client.setEmail(clientDTO.getEmail());
+        }
+
+        Client updatedClient = clientRepository.save(client);
+        return new ResponseEntity<>(new ClientDTO(updatedClient), HttpStatus.OK);
     }
 
     @PatchMapping("/update/{id}")
     public ResponseEntity<?> partialUpdateClient(
             @PathVariable Long id,
-            @RequestParam(required = false) String firstName,
-            @RequestParam(required = false) String lastName,
-            @RequestParam(required = false) String email) {
+            @RequestBody ClientDTO clientDTO) {
 
         Client client = clientRepository.findById(id).orElse(null);
 
@@ -85,33 +94,27 @@ public class ClientsController {
             return new ResponseEntity<>("Client not found with id " + id, HttpStatus.NOT_FOUND);
         }
 
-        if (firstName != null) {
-            client.setFirstName(firstName);
+        if (clientDTO.getFirstName() != null && !clientDTO.getFirstName().isBlank()) {
+            client.setFirstName(clientDTO.getFirstName());
         }
-        if (lastName != null) {
-            client.setLastName(lastName);
+        if (clientDTO.getLastName() != null && !clientDTO.getLastName().isBlank()) {
+            client.setLastName(clientDTO.getLastName());
         }
-        if (email != null) {
-            client.setEmail(email);
+        if (clientDTO.getEmail() != null && !clientDTO.getEmail().isBlank()) {
+            client.setEmail(clientDTO.getEmail());
         }
 
         Client updatedClient = clientRepository.save(client);
-        return new ResponseEntity<>(updatedClient, HttpStatus.OK);
+        return new ResponseEntity<>(new ClientDTO(updatedClient), HttpStatus.OK);
     }
 
-
-    //crud para borrar un cliente
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity <String> deleteClient(@PathVariable Long id) {
-        Client client = clientRepository.findById(id).orElse(null);
-
-        if (client==null){
+    public ResponseEntity<String> deleteClient(@PathVariable Long id) {
+        if (!clientRepository.existsById(id)) {
             return new ResponseEntity<>("Client not found with id " + id, HttpStatus.NOT_FOUND);
         }
 
-        clientRepository.save(client);
-
+        clientRepository.deleteById(id);
         return new ResponseEntity<>("Client deleted successfully", HttpStatus.OK);
     }
-
 }
