@@ -17,13 +17,14 @@ public class Account {
     private double balance;
     private LocalDateTime creationDate;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
-    private Client client;  // Cambié "pepe" a "client"
+    private Client client;
 
-    @OneToMany(mappedBy = "account", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Transaction> transactions = new HashSet<>();
 
+    // Constructores
     public Account() {
     }
 
@@ -33,8 +34,13 @@ public class Account {
         this.creationDate = creationDate;
     }
 
+    // Getters y Setters
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getNumber() {

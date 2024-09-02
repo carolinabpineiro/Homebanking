@@ -50,7 +50,7 @@ public class HomebankingApplication {
 			LocalDate tomorrow = today.plusDays(1);
 
 			// ***** Cliente Lola Pineiro *****
-			Client client = new Client("Lola", "Pineiro", "lolapineiro@gmail.com", "password123");
+			Client client = new Client("Lola", "Pineiro", "lolapineiro@gmail.com", "password432");
 			clientRepository.save(client);
 
 			// Crear y guardar cuentas para Lola

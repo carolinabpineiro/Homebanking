@@ -35,9 +35,10 @@ public class WebConfig {
                 .formLogin(formLogin -> formLogin.disable())  // Desactivar formulario de inicio de sesión
                 .headers(headers -> headers.frameOptions().disable())  // Desactivar protección contra frames
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/clients/","/api/clients/**", "/api/accounts/ ","/api/accounts/**").hasRole("ADMIN")
+                        .requestMatchers("/api/clients/**", "/api/accounts/**").hasRole("ADMIN")
                         .requestMatchers("/api/auth/login", "/api/auth/register", "/h2-console/**").permitAll()
                         .requestMatchers("/api/auth/current").hasRole("CLIENT")
+                        .requestMatchers("/api/cards/**").hasRole("CLIENT")
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
