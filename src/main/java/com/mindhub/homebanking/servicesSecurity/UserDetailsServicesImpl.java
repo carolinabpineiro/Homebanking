@@ -18,13 +18,21 @@ public class UserDetailsServicesImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Client client = clientRepository.findByEmail(username);
+
         if (client == null) {
             throw new UsernameNotFoundException(username);
         }
-        return User
-                .withUsername(client.getEmail())
+        if (username.contains("admin")){
+
+        return User .withUsername(username)
+                .password(client.getPassword())
+                .roles("ADMIN")
+                .build();  //esto es como se crea un userdetails spring security
+    }
+        return User .withUsername(username)
                 .password(client.getPassword())
                 .roles("CLIENT")
                 .build();  //esto es como se crea un userdetails spring security
+
     }
 }

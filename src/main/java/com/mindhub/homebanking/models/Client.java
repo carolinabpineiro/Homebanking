@@ -1,31 +1,41 @@
 package com.mindhub.homebanking.models;
 
 import jakarta.persistence.*;
+import org.antlr.v4.runtime.misc.NotNull;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
 
-@Entity // Se crea la tabla en la base de datos
+@Entity
 public class Client {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @NotNull
     private String firstName;
-    private String lastName;
-    private String email;
-    private String password; // Nuevo campo para la contraseña
 
-    @OneToMany(mappedBy = "client", fetch = FetchType.EAGER) // Nombre de la variable corregido
+    @NotNull
+    private String lastName;
+
+    @NotNull
+    private String email;
+
+    @NotNull
+    private String password; // Deberías encriptar la contraseña
+
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Account> accounts = new HashSet<>();
 
-    @OneToMany(mappedBy = "client", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<ClientLoan> clientLoans = new HashSet<>();
 
-    @OneToMany(mappedBy = "client", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Card> cards = new HashSet<>();
 
     // Constructor vacío para JPA
@@ -37,7 +47,7 @@ public class Client {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-        this.password = password; // Establece la contraseña
+        setPassword(password); // Establece la contraseña con encriptación
     }
 
     // Getters y Setters
@@ -78,7 +88,7 @@ public class Client {
     }
 
     public void setPassword(String password) {
-        this.password = password; // Se puede encriptar aquí antes de guardar
+        this.password = new BCryptPasswordEncoder().encode(password); // Encriptar la contraseña
     }
 
     public Set<Account> getAccounts() {
@@ -120,17 +130,31 @@ public class Client {
     }
 
     public void addAccount(Account account) {
-        account.setClient(this); // Cambiado de "setPepe" a "setClient"
+        account.setClient(this); // Establece el cliente en la cuenta
         accounts.add(account);
     }
 
     public void addClientLoan(ClientLoan clientLoan) {
-        clientLoan.setClient(this);
+        clientLoan.setClient(this); // Establece el cliente en el préstamo
         clientLoans.add(clientLoan);
     }
 
     public void addCard(Card card) {
-        card.setClient(this); // Método para añadir una tarjeta al cliente
-        cards.add(card);
+        this.cards.add(card);
+        card.setClient(this); // Establece el cliente en la tarjeta
+    }
+
+    // Implementación de equals y hashCode para correcta gestión en colecciones
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Client client = (Client) o;
+        return id == client.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

@@ -48,21 +48,21 @@ public class ClientsController {
         return new ResponseEntity<>(new ClientDTO(clientById.get()), HttpStatus.OK);
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<?> createClient(@RequestBody ClientDTO clientDTO) {
         if (clientDTO.getFirstName().isBlank() || clientDTO.getLastName().isBlank() || clientDTO.getEmail().isBlank()) {
             return new ResponseEntity<>("All fields are required", HttpStatus.BAD_REQUEST);
         }
 
-        // Suponiendo que la contraseña no está en ClientDTO, deberías definirla aquí.
-        String defaultPassword = "defaultPassword"; // Cambia esto según tu lógica de seguridad.
+        // Aquí deberías hash de la contraseña
+        String hashedPassword = hashPassword("defaultPassword"); // Cambia esto según tu lógica de seguridad
 
-        Client client = new Client(clientDTO.getFirstName(), clientDTO.getLastName(), clientDTO.getEmail(), defaultPassword);
+        Client client = new Client(clientDTO.getFirstName(), clientDTO.getLastName(), clientDTO.getEmail(), hashedPassword);
         Client savedClient = clientRepository.save(client);
         return new ResponseEntity<>(new ClientDTO(savedClient), HttpStatus.CREATED);
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<?> updateClient(@PathVariable Long id, @RequestBody ClientDTO clientDTO) {
         Client client = clientRepository.findById(id).orElse(null);
         if (client == null) {
@@ -83,7 +83,7 @@ public class ClientsController {
         return new ResponseEntity<>(new ClientDTO(updatedClient), HttpStatus.OK);
     }
 
-    @PatchMapping("/update/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<?> partialUpdateClient(
             @PathVariable Long id,
             @RequestBody ClientDTO clientDTO) {
@@ -108,7 +108,7 @@ public class ClientsController {
         return new ResponseEntity<>(new ClientDTO(updatedClient), HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteClient(@PathVariable Long id) {
         if (!clientRepository.existsById(id)) {
             return new ResponseEntity<>("Client not found with id " + id, HttpStatus.NOT_FOUND);
@@ -116,5 +116,10 @@ public class ClientsController {
 
         clientRepository.deleteById(id);
         return new ResponseEntity<>("Client deleted successfully", HttpStatus.OK);
+    }
+
+    private String hashPassword(String password) {
+        // Implementa tu lógica de hash aquí
+        return password; // Solo para propósitos de demostración
     }
 }
