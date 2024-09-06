@@ -8,24 +8,26 @@ import java.time.LocalDate;
 public class CardDto {
 
     private long id;
-    private String cardHolder;
-    private CardType Cardtype;
+    private String cardHolder; // Nuevo atributo
+    private CardType cardType;
     private CardColor cardColor;
     private String cardNumber;
     private String cvv;
     private LocalDate fromDate;
     private LocalDate thruDate;
 
-    public CardDto(Card card){
+    public CardDto(Card card) {
         this.id = card.getId();
-        this.cardHolder = card.getCardHolder();
-        this.Cardtype = card.getCardType();
-        this.cardNumber = card.getCardNumber();
+        this.cardHolder = card.getCardHolder(); // Ahora disponible
+        this.cardType = card.getCardType();
         this.cardColor = card.getCardColor();
+        this.cardNumber = card.getCardNumber();
         this.cvv = card.getCvv();
         this.fromDate = card.getFromDate();
         this.thruDate = card.getThruDate();
     }
+
+    // Getters y Setters
 
     public long getId() {
         return id;
@@ -35,8 +37,8 @@ public class CardDto {
         return cardHolder;
     }
 
-    public CardType getCardtype() {
-        return Cardtype;
+    public CardType getCardType() {
+        return cardType;
     }
 
     public CardColor getCardColor() {

@@ -5,15 +5,12 @@ import com.Mindhubcohort55.Homebanking.utils.CvvGenerator;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
-
 @Entity
 public class Card {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-
-    private String cardHolder;
+    private Long id;
 
     @Enumerated(EnumType.STRING)
     private CardType cardType;
@@ -26,33 +23,34 @@ public class Card {
     private LocalDate fromDate;
     private LocalDate thruDate;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "owner_id")
-    private Client owner;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id")
+    private Client client;
 
+    private String cardHolder;
+
+    // Constructor vacío
     public Card() {
     }
 
-    public Card(CardType cardType, CardColor cardColor, String cardNumber, String cvv, LocalDate fromDate, LocalDate thruDate, Client client) {
+    // Constructor con parámetros
+    public Card(CardType cardType, CardColor cardColor, String cardNumber, String cvv, LocalDate fromDate, LocalDate thruDate, String cardHolder, Client client) {
         this.cardType = cardType;
         this.cardColor = cardColor;
         this.cardNumber = cardNumber;
         this.cvv = cvv;
         this.fromDate = fromDate;
         this.thruDate = thruDate;
-        this.cardHolder = client.getFirstName() + " " + client.getLastName();
+        this.cardHolder = cardHolder;
+        this.client = client;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public String getCardHolder() {
-        return cardHolder;
-    }
-
-    public void setCardHolder(String cardHolder) {
-        this.cardHolder = cardHolder;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public CardType getCardType() {
@@ -75,17 +73,17 @@ public class Card {
         return cardNumber;
     }
 
-//    public void setCardNumber(String cardNumber) {
-//        this.cardNumber = cardNumber;
-//    }
+    public void setCardNumber(String cardNumber) {
+        this.cardNumber = cardNumber;
+    }
 
     public String getCvv() {
         return cvv;
     }
 
-//    public void setCvv(String cvv) {
-//        this.cvv = cvv;
-//    }
+    public void setCvv(String cvv) {
+        this.cvv = cvv;
+    }
 
     public LocalDate getFromDate() {
         return fromDate;
@@ -103,25 +101,34 @@ public class Card {
         this.thruDate = thruDate;
     }
 
-    public Client getClientOwner() {
-        return owner;
+    public String getCardHolder() {
+        return cardHolder;
     }
 
-    public void setClientOwner(Client clientOwner) {
-        this.owner = clientOwner;
+    public void setCardHolder(String cardHolder) {
+        this.cardHolder = cardHolder;
     }
 
     @Override
     public String toString() {
         return "Card{" +
                 "id=" + id +
-                ", cardHolder='" + cardHolder + '\'' +
                 ", cardType=" + cardType +
                 ", cardColor=" + cardColor +
                 ", cardNumber='" + cardNumber + '\'' +
                 ", cvv='" + cvv + '\'' +
                 ", fromDate=" + fromDate +
                 ", thruDate=" + thruDate +
+                ", client=" + client +
+                ", cardHolder='" + cardHolder + '\'' +
                 '}';
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -17,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
+@EnableWebSecurity
 public class WebConfig {
 
     @Autowired
@@ -26,25 +28,20 @@ public class WebConfig {
     private CorsConfigurationSource corsConfigurationSource;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity)throws Exception{
-
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-
-                .headers(httpSecurityHeadersConfigurer -> httpSecurityHeadersConfigurer.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
-
-                .authorizeHttpRequests(authorize ->
+                .headers(HeadersConfigurer::disable)
+                .authorizeRequests(authorize ->
                         authorize
                                 .requestMatchers("/api/auth/login", "/api/auth/register", "/h2-console/**").permitAll()
-
                                 .requestMatchers("/api/auth/current", "/api/accounts/clients/current/accounts", "/api/clients/current/cards", "/api/transactions").hasRole("CLIENT")
-
                                 .requestMatchers("/api/clients/", "/api/clients/**", "/api/accounts/", "/api/accounts/**").hasRole("ADMIN")
+                                .anyRequest().authenticated()
                 )
-
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
@@ -52,12 +49,12 @@ public class WebConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception{
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 }

@@ -1,11 +1,17 @@
 package com.Mindhubcohort55.Homebanking.controllers;
 
 import com.Mindhubcohort55.Homebanking.dtos.AccountDto;
+import com.Mindhubcohort55.Homebanking.dtos.MakeTransactionDto;
 import com.Mindhubcohort55.Homebanking.models.Account;
 import com.Mindhubcohort55.Homebanking.models.Client;
+import com.Mindhubcohort55.Homebanking.models.Transaction;
+import com.Mindhubcohort55.Homebanking.models.TransactionType;
 import com.Mindhubcohort55.Homebanking.repositories.AccountRepository;
 import com.Mindhubcohort55.Homebanking.repositories.ClientRepository;
+import com.Mindhubcohort55.Homebanking.repositories.TransactionRepository;
+import com.Mindhubcohort55.Homebanking.services.AccountService;
 import com.Mindhubcohort55.Homebanking.utils.AccountNumberGenerator;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +23,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/accounts")
+@RequestMapping("/api")
 public class AccountController {
 
     @Autowired
@@ -26,57 +32,83 @@ public class AccountController {
     @Autowired
     private AccountRepository accountRepository;
 
-    @GetMapping("/")
-    public ResponseEntity<List<AccountDto>> getAllAccounts(){
+    @Autowired
+    private TransactionRepository transactionRepository;
 
-        List<Account> getAllAccounts = accountRepository.findAll();
-        List<AccountDto> allAccountsDto = getAllAccounts.stream().map(AccountDto::new).collect(Collectors.toList());
+    @Transactional
+    @PostMapping("/transactions")
+    public ResponseEntity<?> makeTransaction(@RequestBody MakeTransactionDto makeTransactionDto, Authentication authentication) {
 
-        return new ResponseEntity<>(allAccountsDto, HttpStatus.OK);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getAccountById(@PathVariable Long id){
-
-        Optional<Account> accountById = accountRepository.findById(id);
-        if(accountById.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }else{
-            Account accountData = accountById.get();
-            AccountDto accountDto = new AccountDto(accountData);
-            return new ResponseEntity<>(accountDto,HttpStatus.OK);
-        }
-    }
-
-    @PostMapping("/clients/current/accounts")
-    public ResponseEntity<?> createAccount(Authentication authentication){
-
-        try{
+        try {
+            // Obtener el cliente autenticado usando el repositorio
             Client client = clientRepository.findByEmail(authentication.getName());
 
-            if(client.getAccounts().size() == 3){
-                return new ResponseEntity<>("You cannot create a new account at this time. You have reached the maximum number of allowed accounts (3)", HttpStatus.FORBIDDEN);
+            if (client == null) {
+                return new ResponseEntity<>("Client not found", HttpStatus.FORBIDDEN);
             }
 
-            Account newAccount = new Account(AccountNumberGenerator.makeAccountNumber(), LocalDateTime.now(), 00.0);
-            client.addAccounts(newAccount);
-            accountRepository.save(newAccount);
-            clientRepository.save(client);
+            // Obtener las cuentas de origen y destino usando el repositorio
+            Account sourceAccount = accountRepository.findByNumber(makeTransactionDto.sourceAccount());
+            Account destinationAccount = accountRepository.findByNumber(makeTransactionDto.destinationAccount());
 
-            return new ResponseEntity<>("Account created", HttpStatus.CREATED);
+            // Validaciones
+            if (makeTransactionDto.sourceAccount().isBlank()) {
+                return new ResponseEntity<>("The source account field must not be empty", HttpStatus.FORBIDDEN);
+            }
+
+            if (makeTransactionDto.destinationAccount().isBlank()) {
+                return new ResponseEntity<>("The destination account field must not be empty", HttpStatus.FORBIDDEN);
+            }
+
+            if (makeTransactionDto.amount() == null || makeTransactionDto.amount().isNaN() || makeTransactionDto.amount() < 0) {
+                return new ResponseEntity<>("Enter a valid amount", HttpStatus.FORBIDDEN);
+            }
+
+            if (makeTransactionDto.description().isBlank()) {
+                return new ResponseEntity<>("The description field must not be empty", HttpStatus.FORBIDDEN);
+            }
+
+            if (makeTransactionDto.sourceAccount().equals(makeTransactionDto.destinationAccount())) {
+                return new ResponseEntity<>("The source account and the destination account must not be the same", HttpStatus.FORBIDDEN);
+            }
+
+            if (!accountRepository.existsByNumber(makeTransactionDto.sourceAccount())) {
+                return new ResponseEntity<>("The source account entered does not exist", HttpStatus.FORBIDDEN);
+            }
+
+            if (!accountRepository.existsByIdAndOwner(sourceAccount.getId(), client)) {
+                return new ResponseEntity<>("The source account entered does not belong to the client", HttpStatus.FORBIDDEN);
+            }
+
+            if (!accountRepository.existsByNumber(makeTransactionDto.destinationAccount())) {
+                return new ResponseEntity<>("The destination account entered does not exist", HttpStatus.FORBIDDEN);
+            }
+
+            if (sourceAccount.getBalance() < makeTransactionDto.amount()) {
+                return new ResponseEntity<>("You do not have sufficient balance to carry out the operation", HttpStatus.FORBIDDEN);
+            }
+
+            // Crear las instancias de transacciones de débito y crédito, agregarlas a sus respectivas cuentas y guardarlas en la DB
+            Transaction sourceTransaction = new Transaction(TransactionType.DEBIT, -makeTransactionDto.amount(), makeTransactionDto.description() + makeTransactionDto.sourceAccount(), LocalDateTime.now(), sourceAccount);
+            sourceAccount.addTransaction(sourceTransaction);
+            transactionRepository.save(sourceTransaction);
+
+            Transaction destinyTransaction = new Transaction(TransactionType.CREDIT, makeTransactionDto.amount(), makeTransactionDto.description() + makeTransactionDto.destinationAccount(), LocalDateTime.now(), destinationAccount);
+            destinationAccount.addTransaction(destinyTransaction);
+            transactionRepository.save(destinyTransaction);
+
+            // Actualizar los balances de las cuentas de origen y destino, y guardar los cambios en la BD
+            double sourceCurrentBalance = sourceAccount.getBalance();
+            sourceAccount.setBalance(sourceCurrentBalance - makeTransactionDto.amount());
+            accountRepository.save(sourceAccount);
+
+            double destinationCurrentBalance = destinationAccount.getBalance();
+            destinationAccount.setBalance(destinationCurrentBalance + makeTransactionDto.amount());
+            accountRepository.save(destinationAccount);
+
+            return new ResponseEntity<>("Transaction completed successfully", HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error making transaction: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        catch (Exception e){
-            return new ResponseEntity<>("Error creating account" + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @GetMapping("/clients/current/accounts")
-    public ResponseEntity<?> getClientAccounts(Authentication authentication){
-
-        Client client = clientRepository.findByEmail(authentication.getName());
-        List<Account> clientAccounts = accountRepository.findByOwner(client);
-        List<AccountDto> clientAccountDto = clientAccounts.stream().map(AccountDto::new).collect(Collectors.toList());
-
-        return new ResponseEntity<>(clientAccountDto, HttpStatus.OK );
     }
 }

@@ -35,74 +35,69 @@ public class TransactionController {
 
     @Transactional
     @PostMapping("/transactions")
-    public ResponseEntity<?> makeTransaction(@RequestBody MakeTransactionDto makeTransactionDto, Authentication authentication){
-
-        try{
+    public ResponseEntity<String> makeTransaction(@RequestBody MakeTransactionDto makeTransactionDto, Authentication authentication) {
+        try {
+            // Obtener el cliente autenticado
             Client client = clientRepository.findByEmail(authentication.getName());
+
+            if (client == null) {
+                return new ResponseEntity<>("Client not found", HttpStatus.FORBIDDEN);
+            }
+
+            // Obtener las cuentas de origen y destino
             Account sourceAccount = accountRepository.findByNumber(makeTransactionDto.sourceAccount());
             Account destinationAccount = accountRepository.findByNumber(makeTransactionDto.destinationAccount());
 
-//          Validaciones:
-
-            if(makeTransactionDto.sourceAccount().isBlank()){
+            // Validaciones
+            if (makeTransactionDto.sourceAccount().isBlank()) {
                 return new ResponseEntity<>("The source account field must not be empty", HttpStatus.FORBIDDEN);
             }
 
-            if(makeTransactionDto.destinationAccount().isBlank()){
+            if (makeTransactionDto.destinationAccount().isBlank()) {
                 return new ResponseEntity<>("The destination account field must not be empty", HttpStatus.FORBIDDEN);
             }
 
-            if(makeTransactionDto.amount() == null || makeTransactionDto.amount().isNaN() || makeTransactionDto.amount() < 0){
+            if (makeTransactionDto.amount() == null || makeTransactionDto.amount() <= 0) {
                 return new ResponseEntity<>("Enter a valid amount", HttpStatus.FORBIDDEN);
             }
 
-            if(makeTransactionDto.description().isBlank()){
+            if (makeTransactionDto.description().isBlank()) {
                 return new ResponseEntity<>("The description field must not be empty", HttpStatus.FORBIDDEN);
             }
 
-            if(makeTransactionDto.sourceAccount().equals(makeTransactionDto.destinationAccount())){
+            if (makeTransactionDto.sourceAccount().equals(makeTransactionDto.destinationAccount())) {
                 return new ResponseEntity<>("The source account and the destination account must not be the same", HttpStatus.FORBIDDEN);
             }
 
-            if(!accountRepository.existsByNumber(makeTransactionDto.sourceAccount())){
-                return new ResponseEntity<>("The source account entered does not exist", HttpStatus.FORBIDDEN);
+            if (sourceAccount == null || !accountRepository.existsByIdAndOwner(sourceAccount.getId(), client)) {
+                return new ResponseEntity<>("The source account entered does not belong to the client or does not exist", HttpStatus.FORBIDDEN);
             }
 
-            if(!accountRepository.existsByIdAndOwner(sourceAccount.getId(), client)){
-                return new ResponseEntity<>("The source account entered does not belong to the client", HttpStatus.FORBIDDEN);
-            }
-
-            if(!accountRepository.existsByNumber(makeTransactionDto.destinationAccount())){
+            if (destinationAccount == null) {
                 return new ResponseEntity<>("The destination account entered does not exist", HttpStatus.FORBIDDEN);
             }
 
-            if(sourceAccount.getBalance() < makeTransactionDto.amount()){
+            if (sourceAccount.getBalance() < makeTransactionDto.amount()) {
                 return new ResponseEntity<>("You do not have sufficient balance to carry out the operation", HttpStatus.FORBIDDEN);
             }
 
-//          Creando las instancias de transaciones de debito y credito, agregandolas a sus respectivas cuentas y guardando en la DB
-
-            Transaction sourceTransaction = new Transaction(TransactionType.DEBIT, -makeTransactionDto.amount(), makeTransactionDto.description() + makeTransactionDto.sourceAccount(), LocalDateTime.now());
+            // Crear las instancias de transacciones de débito y crédito
+            Transaction sourceTransaction = new Transaction(TransactionType.DEBIT, -makeTransactionDto.amount(), makeTransactionDto.description(), LocalDateTime.now(), sourceAccount);
             sourceAccount.addTransaction(sourceTransaction);
             transactionRepository.save(sourceTransaction);
 
-            Transaction destinyTransaction = new Transaction(TransactionType.CREDIT, makeTransactionDto.amount(), makeTransactionDto.description() + makeTransactionDto.destinationAccount(), LocalDateTime.now());
-            destinationAccount.addTransaction(destinyTransaction);
-            transactionRepository.save(destinyTransaction);
+            Transaction destinationTransaction = new Transaction(TransactionType.CREDIT, makeTransactionDto.amount(), makeTransactionDto.description(), LocalDateTime.now(), destinationAccount);
+            destinationAccount.addTransaction(destinationTransaction);
+            transactionRepository.save(destinationTransaction);
 
-//          Actualizando balances de las cuentas de origen y de destino, y guardando los cambios en la BD
-            double sourceCurrentBalance = sourceAccount.getBalance();
-            sourceAccount.setBalance(sourceCurrentBalance - makeTransactionDto.amount());
+            // Actualizar balances de las cuentas
+            sourceAccount.setBalance(sourceAccount.getBalance() - makeTransactionDto.amount());
+            destinationAccount.setBalance(destinationAccount.getBalance() + makeTransactionDto.amount());
             accountRepository.save(sourceAccount);
-
-            double destinationCurrentBalance = destinationAccount.getBalance();
-            destinationAccount.setBalance(destinationCurrentBalance + makeTransactionDto.amount());
             accountRepository.save(destinationAccount);
 
             return new ResponseEntity<>("Transaction completed successfully", HttpStatus.CREATED);
-        }
-
-        catch (Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>("Error making transaction: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
