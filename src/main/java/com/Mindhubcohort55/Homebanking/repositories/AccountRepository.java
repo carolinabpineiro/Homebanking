@@ -12,5 +12,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     Boolean existsByNumber(String number);
     Account findByNumber(String number);
     Boolean existsByIdAndOwner(Long accountId, Client client);
-    List<Account> findByOwner (Client owner);
+    List<Account> findByOwner(Client owner);
+    List<Account> findByStatus(boolean status);  // Agregado para la búsqueda por estado
 }

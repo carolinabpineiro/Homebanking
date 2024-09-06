@@ -88,12 +88,25 @@ public class AuthController {
                 return new ResponseEntity<>("The Email entered is already registered", HttpStatus.FORBIDDEN);
             }
 
-            Client newClient = new Client(registerDto.firstName(), registerDto.lastName(), registerDto.email(), passwordEncoder.encode(registerDto.password()));
-            Account defaultaccount = new Account(AccountNumberGenerator.makeAccountNumber(), LocalDateTime.now(), 0.00);
-            newClient.addAccounts(defaultaccount);
+            Client newClient = new Client(
+                    registerDto.firstName(),
+                    registerDto.lastName(),
+                    registerDto.email(),
+                    passwordEncoder.encode(registerDto.password())
+            );
 
+            Account defaultAccount = new Account(
+                    AccountNumberGenerator.makeAccountNumber(),
+                    LocalDateTime.now(),
+                    0.00,
+                    true  // O false, dependiendo del estado inicial que desees
+            );
+
+            newClient.addAccounts(defaultAccount);
+
+// Guarda el cliente y la cuenta en la base de datos
             clientRepository.save(newClient);
-            accountRepository.save(defaultaccount);
+            accountRepository.save(defaultAccount);
 
             return new ResponseEntity<>("Client created", HttpStatus.CREATED);
         }

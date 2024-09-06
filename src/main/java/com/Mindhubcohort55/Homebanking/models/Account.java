@@ -4,37 +4,47 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
-public class  Account {
+public class Account {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     private String number;
     private LocalDateTime creationDate;
     private double balance;
+    private boolean status;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
     private Client owner;
 
-    @OneToMany(mappedBy = "account", fetch = FetchType.EAGER)
-    private List<Transaction> transactions = new ArrayList<>();
+    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<Transaction> transactions = new HashSet<>();
 
+    // Constructor vacío
     public Account() {
     }
 
-    public Account(String number, LocalDateTime creationDate, double balance) {
+    // Constructor con parámetros
+    public Account(String number, LocalDateTime creationDate, double balance, boolean status) {
         this.number = number;
         this.creationDate = creationDate;
         this.balance = balance;
+        this.status = status;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getNumber() {
@@ -61,6 +71,14 @@ public class  Account {
         this.balance = balance;
     }
 
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
     public Client getOwner() {
         return owner;
     }
@@ -69,13 +87,12 @@ public class  Account {
         this.owner = owner;
     }
 
-    public List<Transaction> getTransactions() {
+    public Set<Transaction> getTransactions() {
         return transactions;
     }
 
-    public void addTransaction(Transaction transaction){
-        this.transactions.add(transaction);
-        transaction.setAccount(this);
+    public void setTransactions(Set<Transaction> transactions) {
+        this.transactions = transactions;
     }
 
     @Override
@@ -85,7 +102,14 @@ public class  Account {
                 ", number='" + number + '\'' +
                 ", creationDate=" + creationDate +
                 ", balance=" + balance +
+                ", status=" + status +
+                ", owner=" + owner +
                 ", transactions=" + transactions +
                 '}';
+    }
+
+    public void addTransaction(Transaction transaction) {
+        transactions.add(transaction);
+        transaction.setAccount(this);
     }
 }

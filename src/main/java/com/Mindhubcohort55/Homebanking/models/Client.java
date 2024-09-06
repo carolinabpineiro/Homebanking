@@ -13,35 +13,41 @@ public class Client {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     private String firstName;
     private String lastName;
     private String email;
     private String password;
 
-    @OneToMany(mappedBy = "owner", fetch = FetchType.EAGER)
-    private List<Account> accounts = new ArrayList<>();
+    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<Account> accounts = new HashSet<>();
 
-    @OneToMany(mappedBy = "client", fetch = FetchType.EAGER)
-    private Set<ClientLoan> clientLoans = new HashSet<>();
-
-    @OneToMany(mappedBy = "owner", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "client", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Card> cards = new HashSet<>();
 
-    public Client() {}
+    @OneToMany(mappedBy = "client", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<ClientLoan> clientLoans = new HashSet<>();
 
-    public Client(String firstName, String lastName, String email) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
+    // Constructor vacío
+    public Client() {
     }
 
+    // Constructor con parámetros
     public Client(String firstName, String lastName, String email, String password) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.password = password;
+    }
+
+    // Getters y Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getFirstName() {
@@ -68,43 +74,36 @@ public class Client {
         this.email = email;
     }
 
-    public long getId() {
-        return id;
-    }
-
-    public List<Account> getAccounts() {
-        return accounts;
-    }
-
-    public void addAccounts(Account account){
-        this.accounts.add(account);
-        account.setOwner(this);
-    }
-
-    public Set<ClientLoan> getClientLoans() {
-        return clientLoans;
-    }
-
-    public void addClientLoan(ClientLoan clientLoan) {
-        this.clientLoans.add(clientLoan);
-        clientLoan.setClient(this);
-    }
-
-    public Set<Card> getCards() {
-        return cards;
-    }
-
-    public void addCard(Card card){
-        this.cards.add(card);
-        card.setClientOwner(this);
-    }
-
     public String getPassword() {
         return password;
     }
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Set<Account> getAccounts() {
+        return accounts;
+    }
+
+    public void setAccounts(Set<Account> accounts) {
+        this.accounts = accounts;
+    }
+
+    public Set<Card> getCards() {
+        return cards;
+    }
+
+    public void setCards(Set<Card> cards) {
+        this.cards = cards;
+    }
+
+    public Set<ClientLoan> getClientLoans() {
+        return clientLoans;
+    }
+
+    public void setClientLoans(Set<ClientLoan> clientLoans) {
+        this.clientLoans = clientLoans;
     }
 
     @Override
@@ -114,9 +113,25 @@ public class Client {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
                 ", accounts=" + accounts +
-                ", clientLoans=" + clientLoans +
                 ", cards=" + cards +
+                ", clientLoans=" + clientLoans +
                 '}';
+    }
+
+    public void addAccounts(Account account) {
+        this.accounts.add(account);
+        account.setOwner(this);
+    }
+
+    public void addCard(Card card) {
+        this.cards.add(card);
+        card.setClient(this);
+    }
+
+    public void addClientLoan(ClientLoan clientLoan) {
+        this.clientLoans.add(clientLoan);
+        clientLoan.setClient(this);
     }
 }

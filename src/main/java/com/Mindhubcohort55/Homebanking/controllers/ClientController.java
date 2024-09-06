@@ -21,31 +21,23 @@ public class ClientController {
     @Autowired
     private ClientRepository clientRepository;
 
-//    @Autowired
-//    private AccountRepository accountRepository;
-
     @GetMapping("/")
     public ResponseEntity<List<ClientDto>> getAllClients() {
-
         List<Client> allClients = clientRepository.findAll();
-        List<ClientDto> allClientsDto = new ArrayList<>();
-        allClientsDto = allClients.stream().map(ClientDto::new).collect(Collectors.toList());
-
+        List<ClientDto> allClientsDto = allClients.stream().map(ClientDto::new).collect(Collectors.toList());
         return new ResponseEntity<>(allClientsDto, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getClientById(@PathVariable Long id) {
-
         Optional<Client> clientById = clientRepository.findById(id);
 
-        if (clientById.isEmpty()){
+        if (clientById.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }else{
+        } else {
             Client clientData = clientById.get();
             ClientDto clientDto = new ClientDto(clientData);
             return new ResponseEntity<>(clientDto, HttpStatus.OK);
         }
     }
-
 }

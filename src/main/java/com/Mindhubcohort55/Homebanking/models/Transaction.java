@@ -8,10 +8,10 @@ public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id; // Usualmente Long en lugar de long
 
     @Enumerated(EnumType.STRING)
-    private TransactionType transactionType;
+    private TransactionType transactionType; // Correcto
 
     private double amount;
     private String description;
@@ -21,18 +21,26 @@ public class Transaction {
     @JoinColumn(name = "account_id")
     private Account account;
 
+    // Constructor vacío
     public Transaction() {
     }
 
-    public Transaction(TransactionType transactionType, double amount, String description, LocalDateTime dateTransaction) {
+    // Constructor completo
+    public Transaction(TransactionType transactionType, double amount, String description, LocalDateTime dateTransaction, Account account) {
         this.transactionType = transactionType;
         this.amount = amount;
         this.description = description;
         this.dateTransaction = dateTransaction;
+        this.account = account;
     }
 
+    // Getters y setters
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public TransactionType getTransactionType() {

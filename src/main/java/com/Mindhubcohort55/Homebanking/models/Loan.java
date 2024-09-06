@@ -6,35 +6,40 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 public class Loan {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     private String name;
-    private double maxAmount;
+    private double maxAmount;  // Asegúrate de que sea de tipo double
 
     @ElementCollection
-    @Column(name = "payments")
+    @Column(name="payments")
     private List<Integer> payments = new ArrayList<>();
 
     @OneToMany(mappedBy = "loan", fetch = FetchType.EAGER)
     private Set<ClientLoan> clientLoans = new HashSet<>();
 
-    public Loan() {
-    }
+    // Constructores
+    public Loan() {}
 
     public Loan(String name, double maxAmount, List<Integer> payments) {
         this.name = name;
-        this.maxAmount = maxAmount;
+        this.maxAmount = maxAmount;  // Asegúrate de que sea de tipo double
         this.payments = payments;
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -65,19 +70,7 @@ public class Loan {
         return clientLoans;
     }
 
-    public void addClientLoan(ClientLoan clientLoan) {
-        this.clientLoans.add(clientLoan);
-        clientLoan.setLoan(this);
-    }
-
-    @Override
-    public String toString() {
-        return "Loan{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", maxAmount=" + maxAmount +
-                ", payments=" + payments +
-                ", clientLoans=" + clientLoans +
-                '}';
+    public void setClientLoans(Set<ClientLoan> clientLoans) {
+        this.clientLoans = clientLoans;
     }
 }
