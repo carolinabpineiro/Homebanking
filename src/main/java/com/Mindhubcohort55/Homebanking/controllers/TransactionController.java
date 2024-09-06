@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/transactions")
 public class TransactionController {
 
     @Autowired
@@ -34,7 +34,7 @@ public class TransactionController {
     private TransactionRepository transactionRepository;
 
     @Transactional
-    @PostMapping("/transactions")
+    @PostMapping
     public ResponseEntity<String> makeTransaction(@RequestBody MakeTransactionDto makeTransactionDto, Authentication authentication) {
         try {
             // Obtener el cliente autenticado

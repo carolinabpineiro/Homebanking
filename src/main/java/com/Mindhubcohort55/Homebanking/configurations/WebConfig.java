@@ -18,7 +18,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
-@EnableWebSecurity
 public class WebConfig {
 
     @Autowired
@@ -29,18 +28,18 @@ public class WebConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+
         httpSecurity
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-                .headers(HeadersConfigurer::disable)
-                .authorizeRequests(authorize ->
+                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
+                .authorizeHttpRequests(authorize ->
                         authorize
-                                .requestMatchers("/api/auth/login", "/api/auth/register", "/h2-console/**").permitAll()
-                                .requestMatchers("/api/auth/current", "/api/accounts/clients/current/accounts", "/api/clients/current/cards", "/api/transactions").hasRole("CLIENT")
-                                .requestMatchers("/api/clients/", "/api/clients/**", "/api/accounts/", "/api/accounts/**").hasRole("ADMIN")
-                                .anyRequest().authenticated()
+                                .requestMatchers("/api/auth/login", "/api/auth/signup", "/h2-console/**").permitAll()
+                                .requestMatchers("/api/clients/current/**").hasRole("CLIENT")
+                                .requestMatchers("/api/clients/**", "/api/accounts/**").hasRole("ADMIN")
                 )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

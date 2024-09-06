@@ -10,7 +10,7 @@ import java.util.Random;
 public class AccountNumberGenerator {
 
     @Autowired
-    private static AccountRepository accountRepository;
+    public static AccountRepository accountRepository;
 //    private static final Random random = new Random();
 
     public AccountNumberGenerator(AccountRepository accountRepository) {
