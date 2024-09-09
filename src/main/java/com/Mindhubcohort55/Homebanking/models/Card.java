@@ -10,30 +10,33 @@ public class Card {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // ID único de la tarjeta, generado automáticamente
 
     @Enumerated(EnumType.STRING)
-    private CardType cardType;
+    private CardType cardType; // Tipo de tarjeta (por ejemplo, débito, crédito)
 
     @Enumerated(EnumType.STRING)
-    private CardColor cardColor;
+    private CardColor cardColor; // Color de la tarjeta (por ejemplo, azul, rojo)
 
-    private String cardNumber;
-    private String cvv;
-    private LocalDate fromDate;
-    private LocalDate thruDate;
+    private String cardNumber; // Número de tarjeta, debe ser único
+
+    private String cvv; // Código de verificación de la tarjeta
+
+    private LocalDate fromDate; // Fecha desde la cual la tarjeta es válida
+
+    private LocalDate thruDate; // Fecha hasta la cual la tarjeta es válida
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
-    private Client client;
+    private Client client; // Cliente asociado con la tarjeta
 
-    private String cardHolder;
+    private String cardHolder; // Nombre del titular de la tarjeta
 
     // Constructor vacío
     public Card() {
     }
 
-    // Constructor con parámetros
+    // Constructor con parámetros para inicializar todos los atributos
     public Card(CardType cardType, CardColor cardColor, String cardNumber, String cvv, LocalDate fromDate, LocalDate thruDate, String cardHolder, Client client) {
         this.cardType = cardType;
         this.cardColor = cardColor;
@@ -45,6 +48,7 @@ public class Card {
         this.client = client;
     }
 
+    // Getters y Setters
     public Long getId() {
         return id;
     }
@@ -109,6 +113,14 @@ public class Card {
         this.cardHolder = cardHolder;
     }
 
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
     @Override
     public String toString() {
         return "Card{" +
@@ -122,13 +134,5 @@ public class Card {
                 ", client=" + client +
                 ", cardHolder='" + cardHolder + '\'' +
                 '}';
-    }
-
-    public Client getClient() {
-        return client;
-    }
-
-    public void setClient(Client client) {
-        this.client = client;
     }
 }

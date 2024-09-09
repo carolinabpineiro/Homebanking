@@ -8,18 +8,20 @@ public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Usualmente Long en lugar de long
+    private Long id; // ID único de la transacción, generado automáticamente
 
     @Enumerated(EnumType.STRING)
-    private TransactionType transactionType; // Correcto
+    private TransactionType transactionType; // Tipo de transacción (por ejemplo, DEPOSIT, WITHDRAWAL) representado como una cadena de texto
 
-    private double amount;
-    private String description;
-    private LocalDateTime dateTransaction;
+    private double amount; // Monto de la transacción
+
+    private String description; // Descripción de la transacción
+
+    private LocalDateTime dateTransaction; // Fecha y hora en que ocurrió la transacción
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "account_id")
-    private Account account;
+    private Account account; // Cuenta asociada con la transacción
 
     // Constructor vacío
     public Transaction() {

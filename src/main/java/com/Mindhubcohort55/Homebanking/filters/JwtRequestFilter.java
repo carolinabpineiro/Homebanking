@@ -33,23 +33,24 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             String jwt = null;
 
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-                jwt = authorizationHeader.substring(7);
-                username = jwtUtilService.extractUserName(jwt);
+                jwt = authorizationHeader.substring(7); // Extrae el JWT del encabezado
+                username = jwtUtilService.extractUserName(jwt); // Extrae el nombre de usuario del JWT
             }
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username); // Carga los detalles del usuario
 
-                if (!jwtUtilService.isTokenExpired(jwt)) {
+                if (!jwtUtilService.isTokenExpired(jwt)) { // Verifica si el token ha expirado
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    // Crea un objeto de autenticación con los detalles del usuario
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request)); // Agrega detalles adicionales a la autenticación
+                    SecurityContextHolder.getContext().setAuthentication(authentication); // Establece la autenticación en el contexto de seguridad
                 }
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println(e.getMessage()); // Manejo de errores, imprime el mensaje de excepción
         } finally {
-            filterChain.doFilter(request, response);
+            filterChain.doFilter(request, response); // Continua con el filtro en la cadena
         }
     }
 }

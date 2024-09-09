@@ -13,27 +13,31 @@ public class Loan {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private long id; // ID único del préstamo, generado automáticamente
 
-    private String name;
-    private double maxAmount;  // Asegúrate de que sea de tipo double
+    private String name; // Nombre del préstamo
+
+    private double maxAmount;  // Monto máximo del préstamo, asegurado de tipo double
 
     @ElementCollection
     @Column(name="payments")
-    private List<Integer> payments = new ArrayList<>();
+    private List<Integer> payments = new ArrayList<>(); // Lista de pagos asociados al préstamo
 
     @OneToMany(mappedBy = "loan", fetch = FetchType.EAGER)
-    private Set<ClientLoan> clientLoans = new HashSet<>();
+    private Set<ClientLoan> clientLoans = new HashSet<>(); // Conjunto de préstamos asociados a clientes
 
     // Constructores
-    public Loan() {}
-
-    public Loan(String name, double maxAmount, List<Integer> payments) {
-        this.name = name;
-        this.maxAmount = maxAmount;  // Asegúrate de que sea de tipo double
-        this.payments = payments;
+    public Loan() {
+        // Constructor vacío para inicialización
     }
 
+    public Loan(String name, double maxAmount, List<Integer> payments) {
+        this.name = name; // Nombre del préstamo
+        this.maxAmount = maxAmount; // Monto máximo del préstamo
+        this.payments = payments; // Lista de pagos asociados al préstamo
+    }
+
+    // Getters y setters
     public long getId() {
         return id;
     }

@@ -8,108 +8,113 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-    @Entity
-    public class Account {
+@Entity
+public class Account {
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id; // Identificador único de la cuenta, generado automáticamente
 
-        private String number;
-        private LocalDateTime creationDate;
-        private double balance;
-        private boolean status;
+    private String number; // Número de cuenta, debe ser único
 
-        @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "client_id")
-        private Client client;
+    private LocalDateTime creationDate; // Fecha de creación de la cuenta
 
-        @OneToMany(mappedBy = "account", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-        private Set<Transaction> transactions = new HashSet<>();
+    private double balance; // Saldo de la cuenta
 
-        // Constructor vacío
-        public Account() {
-        }
+    private boolean status; // Estado de la cuenta (por ejemplo, activa o inactiva)
 
-        // Constructor con parámetros
-        public Account(String number, LocalDateTime creationDate, double balance, boolean status) {
-            this.number = number;
-            this.creationDate = creationDate;
-            this.balance = balance;
-            this.status = status;
-        }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id")
+    private Client client; // Cliente asociado con esta cuenta
 
-        public Long getId() {
-            return id;
-        }
+    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<Transaction> transactions = new HashSet<>(); // Transacciones asociadas con la cuenta
 
-        public void setId(Long id) {
-            this.id = id;
-        }
-
-        public String getNumber() {
-            return number;
-        }
-
-        public void setNumber(String number) {
-            this.number = number;
-        }
-
-        public LocalDateTime getCreationDate() {
-            return creationDate;
-        }
-
-        public void setCreationDate(LocalDateTime creationDate) {
-            this.creationDate = creationDate;
-        }
-
-        public double getBalance() {
-            return balance;
-        }
-
-        public void setBalance(double balance) {
-            this.balance = balance;
-        }
-
-        public boolean isStatus() {
-            return status;
-        }
-
-        public void setStatus(boolean status) {
-            this.status = status;
-        }
-
-        public Client getClient() {
-            return client;
-        }
-
-        public void setClient(Client client) {
-            this.client = client;
-        }
-
-        public Set<Transaction> getTransactions() {
-            return transactions;
-        }
-
-        public void setTransactions(Set<Transaction> transactions) {
-            this.transactions = transactions;
-        }
-
-        @Override
-        public String toString() {
-            return "Account{" +
-                    "id=" + id +
-                    ", number='" + number + '\'' +
-                    ", creationDate=" + creationDate +
-                    ", balance=" + balance +
-                    ", status=" + status +
-                    ", client=" + client +
-                    ", transactions=" + transactions +
-                    '}';
-        }
-
-        public void addTransaction(Transaction transaction) {
-            transactions.add(transaction);
-            transaction.setAccount(this);
-        }
+    // Constructor vacío
+    public Account() {
     }
+
+    // Constructor con parámetros para inicializar todos los atributos de la cuenta
+    public Account(String number, LocalDateTime creationDate, double balance, boolean status) {
+        this.number = number;
+        this.creationDate = creationDate;
+        this.balance = balance;
+        this.status = status;
+    }
+
+    // Getters y Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNumber() {
+        return number;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
+    }
+
+    public LocalDateTime getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(LocalDateTime creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(double balance) {
+        this.balance = balance;
+    }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    public Set<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(Set<Transaction> transactions) {
+        this.transactions = transactions;
+    }
+
+    @Override
+    public String toString() {
+        return "Account{" +
+                "id=" + id +
+                ", number='" + number + '\'' +
+                ", creationDate=" + creationDate +
+                ", balance=" + balance +
+                ", status=" + status +
+                ", client=" + client +
+                ", transactions=" + transactions +
+                '}';
+    }
+
+    // Método para agregar una transacción a la cuenta
+    public void addTransaction(Transaction transaction) {
+        transactions.add(transaction);
+        transaction.setAccount(this);
+    }
+}
