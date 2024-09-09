@@ -20,7 +20,7 @@ public class Client {
     private String email;
     private String password;
 
-    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "client", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Account> accounts = new HashSet<>();
 
     @OneToMany(mappedBy = "client", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -120,9 +120,9 @@ public class Client {
                 '}';
     }
 
-    public void addAccounts(Account account) {
+    public void addAccount(Account account) {
         this.accounts.add(account);
-        account.setOwner(this);
+        account.setClient(this);
     }
 
     public void addCard(Card card) {

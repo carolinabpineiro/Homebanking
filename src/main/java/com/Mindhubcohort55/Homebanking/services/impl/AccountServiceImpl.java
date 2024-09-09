@@ -17,97 +17,103 @@ import java.util.stream.Collectors;
 @Service
 public class AccountServiceImpl implements AccountService {
 
-    private final AccountRepository accountRepository;
-    private final ClientRepository clientRepository;
 
-    @Autowired
-    public AccountServiceImpl(AccountRepository accountRepository, ClientRepository clientRepository) {
-        this.accountRepository = accountRepository;
-        this.clientRepository = clientRepository;
-    }
+        private final AccountRepository accountRepository;
+        private final ClientRepository clientRepository;
 
-    @Override
-    public Account createDefaultAccount(Long clientId) {
-        // Buscar el cliente por ID
-        Client client = clientRepository.findById(clientId)
-                .orElseThrow(() -> new RuntimeException("Client not found"));
-
-        // Verificar si el cliente ya tiene 3 cuentas
-        List<Account> accounts = accountRepository.findByOwner(client);
-        if (accounts.size() >= 3) {
-            throw new RuntimeException("Client cannot have more than 3 accounts");
+        @Autowired
+        public AccountServiceImpl(AccountRepository accountRepository, ClientRepository clientRepository) {
+            this.accountRepository = accountRepository;
+            this.clientRepository = clientRepository;
         }
 
-        // Generar un número de cuenta único usando el generador
-        String accountNumber = AccountNumberGenerator.makeAccountNumber();
+        @Override
+        public Account createDefaultAccount(Long clientId) {
+            // Buscar el cliente por ID
+            Client client = clientRepository.findById(clientId)
+                    .orElseThrow(() -> new RuntimeException("Client not found"));
 
-        // Crear la cuenta por defecto
-        Account defaultAccount = new Account(
-                accountNumber,                // Número de cuenta generado
-                LocalDateTime.now(),          // Fecha de creación
-                0.0,                          // Balance inicial
-                true                          // Estado de la cuenta (activa)
-        );
+            // Verificar si el cliente ya tiene 3 cuentas
+            List<Account> accounts = accountRepository.findByClient(client);
+            if (accounts.size() >= 3) {
+                throw new RuntimeException("Client cannot have more than 3 accounts");
+            }
 
-        // Asignar la cuenta al cliente
-        defaultAccount.setClient(client);
+            // Generar un número de cuenta único usando el generador
+            String accountNumber = AccountNumberGenerator.makeAccountNumber();
 
-        // Guardar la cuenta en la base de datos
-        return accountRepository.save(defaultAccount);
-    }
+            // Crear la cuenta por defecto
+            Account defaultAccount = new Account(
+                    accountNumber,                // Número de cuenta generado
+                    LocalDateTime.now(),          // Fecha de creación
+                    0.0,                          // Balance inicial
+                    true                          // Estado de la cuenta (activa)
+            );
 
-    @Override
-    public Account getAccountById(long id) {
-        return accountRepository.findById(id).orElse(null);
-    }
+            // Asignar la cuenta al cliente
+            defaultAccount.setClient(client);
 
-    @Override
-    public void saveAcc(Account account) {
-        accountRepository.save(account);
-    }
-
-    @Override
-    public List<Account> getAccounts() {
-        return accountRepository.findAll();
-    }
-
-    @Override
-    public Account getAccByNumber(String number) {
-        return accountRepository.findByNumber(number);
-    }
-
-    @Override
-    public List<Account> getAccByStatus(boolean status) {
-        return accountRepository.findByStatus(status);
-    }
-
-    @Override
-    public List<AccountDto> getAccountsDTO() {
-        List<Account> accounts = accountRepository.findAll();
-        return accounts.stream().map(AccountDto::new).collect(Collectors.toList());
-    }
-
-    @Override
-    public void saveAccount(Account account) {
-        accountRepository.save(account);
-    }
-
-    @Override
-    public AccountDto getAccountDTOById(Long id) {
-        Account account = accountRepository.findById(id).orElse(null);
-        if (account != null) {
-            return new AccountDto(account);
+            // Guardar la cuenta en la base de datos
+            return accountRepository.save(defaultAccount);
         }
-        return null;
-    }
 
-    @Override
-    public Account getAccountByNumber(String number) {
-        return accountRepository.findByNumber(number);
-    }
+        @Override
+        public Account getAccountById(long id) {
+            return accountRepository.findById(id).orElse(null);
+        }
+
+        @Override
+        public void saveAcc(Account account) {
+            accountRepository.save(account);
+        }
+
+        @Override
+        public List<Account> getAccounts() {
+            return accountRepository.findAll();
+        }
+
+        @Override
+        public Account getAccByNumber(String number) {
+            return accountRepository.findByNumber(number);
+        }
+
+        @Override
+        public List<Account> getAccByStatus(boolean status) {
+            return accountRepository.findByStatus(status);
+        }
+
+        @Override
+        public List<AccountDto> getAccountsDTO() {
+            List<Account> accounts = accountRepository.findAll();
+            return accounts.stream().map(AccountDto::new).collect(Collectors.toList());
+        }
+
+        @Override
+        public void saveAccount(Account account) {
+            accountRepository.save(account);
+        }
+
+        @Override
+        public AccountDto getAccountDTOById(Long id) {
+            Account account = accountRepository.findById(id).orElse(null);
+            if (account != null) {
+                return new AccountDto(account);
+            }
+            return null;
+        }
+
+        @Override
+        public Account getAccountByNumber(String number) {
+            return accountRepository.findByNumber(number);
+        }
 
     @Override
     public List<Account> getAccByOwner(Client client) {
-        return accountRepository.findByClient(client); // Buscar todas las cuentas del cliente
+        return List.of();
     }
-}
+
+    @Override
+        public List<Account> getAccByClient(Client client) {
+            return accountRepository.findByClient(client); // Buscar todas las cuentas del cliente
+        }
+    }

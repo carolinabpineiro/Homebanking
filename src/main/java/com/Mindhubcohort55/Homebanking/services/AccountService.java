@@ -33,6 +33,8 @@ public interface AccountService {
         Account getAccountByNumber(String number);
 
         List<Account> getAccByOwner(Client client);
-    }
+
+    List<Account> getAccByClient(Client client);
+}
 
 

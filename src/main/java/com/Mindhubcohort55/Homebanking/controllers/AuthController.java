@@ -108,11 +108,11 @@ public class AuthController {
                     true  // O false, dependiendo del estado inicial que desees
             );
 
-            newClient.addAccounts(defaultAccount);
+            // Usa addAccount en lugar de addAccounts
+            newClient.addAccount(defaultAccount);
 
-            // Guarda el cliente y la cuenta en la base de datos
-            clientRepository.save(newClient);  // Debido al CascadeType.ALL, la cuenta se guarda automáticamente
-            // No es necesario llamar a accountRepository.save(defaultAccount) ya que la cuenta se guarda con el cliente
+            // Guarda el cliente en la base de datos; debido al CascadeType.ALL, la cuenta se guarda automáticamente
+            clientRepository.save(newClient);
 
             return new ResponseEntity<>("Client created", HttpStatus.CREATED);
         } catch (Exception e) {

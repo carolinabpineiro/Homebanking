@@ -11,7 +11,7 @@ import java.util.List;
 public interface AccountRepository extends JpaRepository<Account, Long> {
     Boolean existsByNumber(String number);
     Account findByNumber(String number);
-    Boolean existsByIdAndOwner(Long accountId, Client client);
-    List<Account> findByOwner(Client owner);
-    List<Account> findByStatus(boolean status);  // Agregado para la búsqueda por estado
+    Boolean existsByIdAndClient(Long accountId, Client client); // Cambiado de 'owner' a 'client'
+    List<Account> findByClient(Client client);
+    List<Account> findByStatus(boolean status);
 }

@@ -69,7 +69,7 @@ public class TransactionController {
                 return new ResponseEntity<>("The source account and the destination account must not be the same", HttpStatus.FORBIDDEN);
             }
 
-            if (sourceAccount == null || !accountRepository.existsByIdAndOwner(sourceAccount.getId(), client)) {
+            if (sourceAccount == null || !accountRepository.existsByIdAndClient(sourceAccount.getId(), client)) {
                 return new ResponseEntity<>("The source account entered does not belong to the client or does not exist", HttpStatus.FORBIDDEN);
             }
 

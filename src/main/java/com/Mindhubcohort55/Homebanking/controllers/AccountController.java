@@ -66,15 +66,15 @@ public class AccountController {
                 return new ResponseEntity<>("The source account and the destination account must not be the same", HttpStatus.FORBIDDEN);
             }
 
-            if (!accountRepository.existsByNumber(makeTransactionDto.sourceAccount())) {
+            if (sourceAccount == null) {
                 return new ResponseEntity<>("The source account entered does not exist", HttpStatus.FORBIDDEN);
             }
 
-            if (!accountRepository.existsByIdAndOwner(sourceAccount.getId(), client)) {
+            if (!accountRepository.existsByIdAndClient(sourceAccount.getId(), client)) {
                 return new ResponseEntity<>("The source account entered does not belong to the client", HttpStatus.FORBIDDEN);
             }
 
-            if (!accountRepository.existsByNumber(makeTransactionDto.destinationAccount())) {
+            if (destinationAccount == null) {
                 return new ResponseEntity<>("The destination account entered does not exist", HttpStatus.FORBIDDEN);
             }
 
@@ -87,9 +87,9 @@ public class AccountController {
             sourceAccount.addTransaction(sourceTransaction);
             transactionRepository.save(sourceTransaction);
 
-            Transaction destinyTransaction = new Transaction(TransactionType.CREDIT, makeTransactionDto.amount(), makeTransactionDto.description() + makeTransactionDto.destinationAccount(), LocalDateTime.now(), destinationAccount);
-            destinationAccount.addTransaction(destinyTransaction);
-            transactionRepository.save(destinyTransaction);
+            Transaction destinationTransaction = new Transaction(TransactionType.CREDIT, makeTransactionDto.amount(), makeTransactionDto.description() + makeTransactionDto.destinationAccount(), LocalDateTime.now(), destinationAccount);
+            destinationAccount.addTransaction(destinationTransaction);
+            transactionRepository.save(destinationTransaction);
 
             // Actualizar los balances de las cuentas de origen y destino, y guardar los cambios en la BD
             double sourceCurrentBalance = sourceAccount.getBalance();
