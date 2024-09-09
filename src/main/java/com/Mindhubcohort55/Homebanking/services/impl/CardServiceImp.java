@@ -14,14 +14,27 @@ import java.util.stream.Collectors;
 @Service
 public class CardServiceImp implements CardService {
 
+    // Repositorio para gestionar operaciones sobre tarjetas
     @Autowired
     private CardRepository cardRepository;
 
+    /**
+     * Obtiene todas las tarjetas en formato DTO.
+     *
+     * @return Un conjunto de DTOs de tarjetas.
+     */
     @Override
     public Set<CardDto> getCardsDTO() {
+        // Obtener todas las tarjetas, mapearlas a DTOs y recogerlas en un conjunto
         return cardRepository.findAll().stream().map(CardDto::new).collect(Collectors.toSet());
     }
 
+    /**
+     * Guarda una tarjeta en la base de datos después de verificar la cantidad permitida para el cliente.
+     *
+     * @param card La tarjeta a guardar.
+     * @throws RuntimeException Si el cliente ya tiene 3 tarjetas del mismo tipo.
+     */
     @Override
     public void saveCard(Card card) {
         // Obtener el cliente asociado con la tarjeta
@@ -37,18 +50,14 @@ public class CardServiceImp implements CardService {
         cardRepository.save(card);
     }
 
+    /**
+     * Obtiene una tarjeta por su ID.
+     *
+     * @param id ID de la tarjeta.
+     * @return La tarjeta encontrada, o null si no existe.
+     */
     @Override
     public Card getCardById(Long id) {
         return cardRepository.findById(id).orElse(null);
     }
-
-    // Método opcional para desactivar tarjeta
-    /*@Override
-    public void deleteCard (long id){
-        Card card = cardRepository.findById(id).orElse(null);
-        if(card != null){
-            card.setActive(false);  // Asumiendo que existe un atributo active
-            cardRepository.save(card);
-        }
-    }*/
 }
