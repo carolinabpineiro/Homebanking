@@ -1,6 +1,5 @@
 package com.Mindhubcohort55.Homebanking.controllers;
 
-import com.Mindhubcohort55.Homebanking.dtos.AccountDto;
 import com.Mindhubcohort55.Homebanking.dtos.MakeTransactionDto;
 import com.Mindhubcohort55.Homebanking.models.Account;
 import com.Mindhubcohort55.Homebanking.models.Client;
@@ -9,8 +8,6 @@ import com.Mindhubcohort55.Homebanking.models.TransactionType;
 import com.Mindhubcohort55.Homebanking.repositories.AccountRepository;
 import com.Mindhubcohort55.Homebanking.repositories.ClientRepository;
 import com.Mindhubcohort55.Homebanking.repositories.TransactionRepository;
-import com.Mindhubcohort55.Homebanking.services.AccountService;
-import com.Mindhubcohort55.Homebanking.utils.AccountNumberGenerator;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,12 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/accounts")
 public class AccountController {
 
     @Autowired
@@ -72,15 +66,15 @@ public class AccountController {
                 return new ResponseEntity<>("The source account and the destination account must not be the same", HttpStatus.FORBIDDEN);
             }
 
-            if (!accountRepository.existsByNumber(makeTransactionDto.sourceAccount())) {
+            if (sourceAccount == null) {
                 return new ResponseEntity<>("The source account entered does not exist", HttpStatus.FORBIDDEN);
             }
 
-            if (!accountRepository.existsByIdAndOwner(sourceAccount.getId(), client)) {
+            if (!accountRepository.existsByIdAndClient(sourceAccount.getId(), client)) {
                 return new ResponseEntity<>("The source account entered does not belong to the client", HttpStatus.FORBIDDEN);
             }
 
-            if (!accountRepository.existsByNumber(makeTransactionDto.destinationAccount())) {
+            if (destinationAccount == null) {
                 return new ResponseEntity<>("The destination account entered does not exist", HttpStatus.FORBIDDEN);
             }
 
@@ -93,9 +87,9 @@ public class AccountController {
             sourceAccount.addTransaction(sourceTransaction);
             transactionRepository.save(sourceTransaction);
 
-            Transaction destinyTransaction = new Transaction(TransactionType.CREDIT, makeTransactionDto.amount(), makeTransactionDto.description() + makeTransactionDto.destinationAccount(), LocalDateTime.now(), destinationAccount);
-            destinationAccount.addTransaction(destinyTransaction);
-            transactionRepository.save(destinyTransaction);
+            Transaction destinationTransaction = new Transaction(TransactionType.CREDIT, makeTransactionDto.amount(), makeTransactionDto.description() + makeTransactionDto.destinationAccount(), LocalDateTime.now(), destinationAccount);
+            destinationAccount.addTransaction(destinationTransaction);
+            transactionRepository.save(destinationTransaction);
 
             // Actualizar los balances de las cuentas de origen y destino, y guardar los cambios en la BD
             double sourceCurrentBalance = sourceAccount.getBalance();

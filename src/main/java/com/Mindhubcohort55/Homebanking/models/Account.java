@@ -13,25 +13,28 @@ public class Account {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // Identificador único de la cuenta, generado automáticamente
 
-    private String number;
-    private LocalDateTime creationDate;
-    private double balance;
-    private boolean status;
+    private String number; // Número de cuenta, debe ser único
+
+    private LocalDateTime creationDate; // Fecha de creación de la cuenta
+
+    private double balance; // Saldo de la cuenta
+
+    private boolean status; // Estado de la cuenta (por ejemplo, activa o inactiva)
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
-    private Client owner;
+    private Client client; // Cliente asociado con esta cuenta
 
     @OneToMany(mappedBy = "account", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<Transaction> transactions = new HashSet<>();
+    private Set<Transaction> transactions = new HashSet<>(); // Transacciones asociadas con la cuenta
 
     // Constructor vacío
     public Account() {
     }
 
-    // Constructor con parámetros
+    // Constructor con parámetros para inicializar todos los atributos de la cuenta
     public Account(String number, LocalDateTime creationDate, double balance, boolean status) {
         this.number = number;
         this.creationDate = creationDate;
@@ -39,6 +42,7 @@ public class Account {
         this.status = status;
     }
 
+    // Getters y Setters
     public Long getId() {
         return id;
     }
@@ -79,12 +83,12 @@ public class Account {
         this.status = status;
     }
 
-    public Client getOwner() {
-        return owner;
+    public Client getClient() {
+        return client;
     }
 
-    public void setOwner(Client owner) {
-        this.owner = owner;
+    public void setClient(Client client) {
+        this.client = client;
     }
 
     public Set<Transaction> getTransactions() {
@@ -103,11 +107,12 @@ public class Account {
                 ", creationDate=" + creationDate +
                 ", balance=" + balance +
                 ", status=" + status +
-                ", owner=" + owner +
+                ", client=" + client +
                 ", transactions=" + transactions +
                 '}';
     }
 
+    // Método para agregar una transacción a la cuenta
     public void addTransaction(Transaction transaction) {
         transactions.add(transaction);
         transaction.setAccount(this);

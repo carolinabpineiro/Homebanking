@@ -21,18 +21,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 
+import static com.Mindhubcohort55.Homebanking.utils.AccountNumberGenerator.accountRepository;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-
-    @Autowired
-    private ClientRepository clientRepository;
-
-    @Autowired
-    private AccountRepository accountRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -43,48 +36,61 @@ public class AuthController {
     @Autowired
     private JwtUtilService jwtUtilService;
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginDto loginDto){
-        try {
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private ClientRepository clientRepository;
+
+    @Autowired
+    private AccountRepository accountRepository; // Inyecta el repositorio de cuentas
+
+    // Login
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
+        try {
             if (loginDto.email().isBlank()) {
-                return new ResponseEntity<>("The Email field must noy be empty", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("The Email field must not be empty", HttpStatus.BAD_REQUEST);
             }
 
             if (loginDto.password().isBlank()) {
-                return new ResponseEntity<>("The Password field must noy be empty", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("The Password field must not be empty", HttpStatus.BAD_REQUEST);
             }
 
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.email(), loginDto.password()));
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginDto.email(), loginDto.password())
+            );
+
             final UserDetails userDetails = userDetailsService.loadUserByUsername(loginDto.email());
             final String jwt = jwtUtilService.generateToken(userDetails);
+
             return ResponseEntity.ok(jwt);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>("Sorry, email or password invalid", HttpStatus.FORBIDDEN);
         }
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterDto registerDto){
-        try{
-            if(registerDto.firstName().isBlank()){
-                return new ResponseEntity<>("The Name field must noy be empty", HttpStatus.BAD_REQUEST);
+    // Registro
+    @PostMapping("/signup")
+    public ResponseEntity<?> signup(@RequestBody RegisterDto registerDto) {
+        try {
+            if (registerDto.firstName().isBlank()) {
+                return new ResponseEntity<>("The Name field must not be empty", HttpStatus.BAD_REQUEST);
             }
 
-            if(registerDto.lastName().isBlank()){
+            if (registerDto.lastName().isBlank()) {
                 return new ResponseEntity<>("The Last Name field must not be empty", HttpStatus.BAD_REQUEST);
             }
 
-            if(registerDto.password().isBlank()){
+            if (registerDto.password().isBlank()) {
                 return new ResponseEntity<>("The Password field must not be empty", HttpStatus.BAD_REQUEST);
             }
 
-            if(registerDto.email().isBlank()){
-                return new ResponseEntity<>("The Email field must not be empty", HttpStatus.FORBIDDEN);
+            if (registerDto.email().isBlank()) {
+                return new ResponseEntity<>("The Email field must not be empty", HttpStatus.BAD_REQUEST);
             }
 
-            if(clientRepository.existsByEmail(registerDto.email())){
+            if (clientRepository.existsByEmail(registerDto.email())) {
                 return new ResponseEntity<>("The Email entered is already registered", HttpStatus.FORBIDDEN);
             }
 
@@ -102,24 +108,24 @@ public class AuthController {
                     true  // O false, dependiendo del estado inicial que desees
             );
 
-            newClient.addAccounts(defaultAccount);
+            // Usa addAccount en lugar de addAccounts
+            newClient.addAccount(defaultAccount);
 
-// Guarda el cliente y la cuenta en la base de datos
+            // Guarda el cliente en la base de datos; debido al CascadeType.ALL, la cuenta se guarda automáticamente
             clientRepository.save(newClient);
-            accountRepository.save(defaultAccount);
 
             return new ResponseEntity<>("Client created", HttpStatus.CREATED);
-        }
-
-        catch (Exception e) {
+        } catch (Exception e) {
             return new ResponseEntity<>("Error creating client: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
     }
 
     @GetMapping("/current")
-    public ResponseEntity<?> getClient(Authentication authentication){
+    public ResponseEntity<?> getClient(Authentication authentication) {
         Client client = clientRepository.findByEmail(authentication.getName());
+        if (client == null) {
+            return new ResponseEntity<>("Client not found", HttpStatus.NOT_FOUND);
+        }
         return ResponseEntity.ok(new ClientDto(client));
     }
 }

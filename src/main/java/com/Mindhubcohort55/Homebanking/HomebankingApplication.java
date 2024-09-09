@@ -54,8 +54,8 @@ public class HomebankingApplication {
 			Client lola = new Client("Lola", "Pineiro", "lolapineiro@gmail.com", passwordEncoder.encode("0403"));
 			Account accountLola1 = new Account("VIN003", LocalDateTime.now(), 100000.00, true);
 			Account accountLola2 = new Account("VIN004", LocalDateTime.now(), 200000.00, true);
-			lola.addAccounts(accountLola1);
-			lola.addAccounts(accountLola2);
+			lola.addAccount(accountLola1);
+			lola.addAccount(accountLola2);
 
 			// Transacciones para el usuario Lola
 			addTransactions(accountLola1, new Transaction(TransactionType.DEBIT, -100.00, "Internet payment", LocalDateTime.now(), accountLola1));
@@ -69,8 +69,8 @@ public class HomebankingApplication {
 			Client melba = new Client("Melba", "Morel", "melba@mindhub.com", passwordEncoder.encode("1423"));
 			Account accountMelba1 = new Account("VIN001", LocalDateTime.now(), 5000.00, true);
 			Account accountMelba2 = new Account("VIN002", LocalDateTime.now(), 7500.00, true);
-			melba.addAccounts(accountMelba1);
-			melba.addAccounts(accountMelba2);
+			melba.addAccount(accountMelba1);
+			melba.addAccount(accountMelba2);
 
 			addTransactions(accountMelba1, new Transaction(TransactionType.DEBIT, -200.00, "Taxes payment", LocalDateTime.now(), accountMelba1));
 			addTransactions(accountMelba2, new Transaction(TransactionType.CREDIT, 234.00, "Refund", LocalDateTime.now(), accountMelba2));
@@ -82,7 +82,7 @@ public class HomebankingApplication {
 			// Creación del usuario Admin
 			Client admin = new Client("Thomas", "Maldonado", "totomaldopi@gmail.com", passwordEncoder.encode("adminpassword"));
 			Account adminAccount = new Account("VIN999", LocalDateTime.now(), 1000000.00, true);
-			admin.addAccounts(adminAccount);
+			admin.addAccount(adminAccount);
 
 			clientRepository.save(admin);
 			accountRepository.save(adminAccount);

@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/transactions")
 public class TransactionController {
 
     @Autowired
@@ -34,7 +34,7 @@ public class TransactionController {
     private TransactionRepository transactionRepository;
 
     @Transactional
-    @PostMapping("/transactions")
+    @PostMapping
     public ResponseEntity<String> makeTransaction(@RequestBody MakeTransactionDto makeTransactionDto, Authentication authentication) {
         try {
             // Obtener el cliente autenticado
@@ -69,7 +69,7 @@ public class TransactionController {
                 return new ResponseEntity<>("The source account and the destination account must not be the same", HttpStatus.FORBIDDEN);
             }
 
-            if (sourceAccount == null || !accountRepository.existsByIdAndOwner(sourceAccount.getId(), client)) {
+            if (sourceAccount == null || !accountRepository.existsByIdAndClient(sourceAccount.getId(), client)) {
                 return new ResponseEntity<>("The source account entered does not belong to the client or does not exist", HttpStatus.FORBIDDEN);
             }
 
