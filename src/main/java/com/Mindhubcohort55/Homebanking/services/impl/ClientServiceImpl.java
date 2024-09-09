@@ -23,6 +23,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public Client getClientCurrent(Authentication authentication) {
+        // Obtener cliente autenticado por email
         return clientRepository.findByEmail(authentication.getName());
     }
 

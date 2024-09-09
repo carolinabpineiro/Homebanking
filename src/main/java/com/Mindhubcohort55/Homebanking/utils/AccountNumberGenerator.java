@@ -10,23 +10,27 @@ import java.util.Random;
 public class AccountNumberGenerator {
 
     @Autowired
-    public static AccountRepository accountRepository;
-//    private static final Random random = new Random();
+    public static AccountRepository accountRepository; // Inyección de dependencias para el repositorio de cuentas.
 
+    // Constructor para la inyección de dependencias.
     public AccountNumberGenerator(AccountRepository accountRepository) {
         this.accountRepository = accountRepository;
     }
 
-    public static String makeAccountNumber(){
+    // Método para generar un número de cuenta único.
+    public static String makeAccountNumber() {
 
         String leftZero;
 
-        do{
+        // Generar un número de cuenta único hasta que se encuentre uno que no exista en el repositorio.
+        do {
+            // Genera un número aleatorio de 8 dígitos.
             leftZero = String.format("%08d", (int) (Math.random() * (100000000 - 1) + 1));
-            //  leftZero = String.format("%08d", random.nextInt(100000000));
+            // Alternativa comentada usando Random (esto es opcional).
+            // leftZero = String.format("%08d", random.nextInt(100000000));
+        } while (accountRepository.existsByNumber("VIN" + leftZero)); // Verifica que el número generado no exista ya.
 
-        }while (accountRepository.existsByNumber("VIN"+ leftZero));
-
+        // Devuelve el número de cuenta en formato "VINXXXXXXXX", donde "XXXXXXXX" es el número generado.
         return "VIN" + leftZero;
     }
 }
