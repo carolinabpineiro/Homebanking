@@ -7,25 +7,12 @@ import java.util.List;
 
 public interface LoanService {
 
-    /**
-     * Obtiene todos los préstamos en formato DTO.
-     *
-     * @return Una lista de DTOs de préstamos.
-     */
+    // Obtiene todos los préstamos en formato DTO.
     List<LoanDto> getLoansDTO();
 
-    /**
-     * Guarda un préstamo en la base de datos.
-     *
-     * @param loan El préstamo a guardar.
-     */
+    // Guarda un préstamo en la base de datos.
     void saveLoan(Loan loan);
 
-    /**
-     * Busca un préstamo por su ID.
-     *
-     * @param id ID del préstamo.
-     * @return El préstamo encontrado, o null si no existe.
-     */
+    // Busca un préstamo por su ID.
     Loan findLoanById(Long id);
 }

@@ -8,56 +8,21 @@ import java.util.List;
 
 public interface ClientService {
 
-    /**
-     * Obtiene todos los clientes en formato DTO.
-     *
-     * @return Una lista de DTOs de clientes.
-     */
+    // Obtiene todos los clientes en formato DTO.
     List<ClientDto> getClientsDTO();
 
-    /**
-     * Obtiene el cliente actualmente autenticado.
-     *
-     * @param authentication Información de autenticación del usuario.
-     * @return El cliente autenticado, basado en el email proporcionado en la autenticación.
-     */
+    // Obtiene el cliente autenticado actual.
     Client getClientCurrent(Authentication authentication);
 
-    /**
-     * Obtiene un cliente en formato DTO por su ID.
-     *
-     * @param id ID del cliente.
-     * @return El DTO del cliente encontrado, o null si no existe.
-     */
+    // Obtiene un cliente en formato DTO por su ID.
     ClientDto getClientDTO(Long id);
 
-    /**
-     * Busca un cliente por su ID.
-     *
-     * @param id ID del cliente.
-     * @return El cliente encontrado, o null si no existe.
-     */
+    // Busca un cliente por su ID.
     Client findClientById(Long id);
 
-    /**
-     * Guarda un cliente en la base de datos.
-     *
-     * @param client El cliente a guardar.
-     */
-    void saveCLient(Client client);
-
-    /**
-     * Guarda un cliente en la base de datos.
-     *
-     * @param client El cliente a guardar.
-     */
+    // Guarda un cliente en la base de datos.
     void saveClient(Client client);
 
-    /**
-     * Obtiene un cliente por su email.
-     *
-     * @param email Email del cliente.
-     * @return El cliente encontrado, o null si no existe.
-     */
+    // Obtiene un cliente por su email.
     Client getClientByEmail(String email);
 }

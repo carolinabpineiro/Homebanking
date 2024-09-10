@@ -7,26 +7,13 @@ import java.util.List;
 
 public interface TransactionService {
 
-    /**
-     * Guarda una transacción en la base de datos.
-     *
-     * @param transaction La transacción a guardar.
-     */
+    // Guarda una transacción en la base de datos.
     void saveTransaction(Transaction transaction);
 
-    /**
-     * Obtiene una transacción por su ID y la convierte a DTO.
-     *
-     * @param id ID de la transacción.
-     * @return El DTO de la transacción encontrada, o null si no existe.
-     */
+    // Obtiene una transacción por su ID y la convierte a DTO.
     TransactionDto getTransactionById(Long id);
 
-    /**
-     * Obtiene todas las transacciones en formato DTO.
-     *
-     * @return Una lista de DTOs de transacciones.
-     */
+    // Obtiene todas las transacciones en formato DTO.
     List<TransactionDto> getTransactionsDTO();
 }
 
