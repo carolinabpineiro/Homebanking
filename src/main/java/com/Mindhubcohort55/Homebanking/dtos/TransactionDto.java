@@ -21,6 +21,7 @@ public class TransactionDto {
         this.dateTransaction = transaction.getDateTransaction();
     }
 
+    // Getters y setters
     public Long getId() {
         return id;
     }
@@ -40,15 +41,4 @@ public class TransactionDto {
     public LocalDateTime getDateTransaction() {
         return dateTransaction;
     }
-//
-//    @Override
-//    public String toString() {
-//        return "TransactionDto{" +
-//                "id=" + id +
-//                ", transactionType=" + transactionType +
-//                ", amount=" + amount +
-//                ", description='" + description + '\'' +
-//                ", dateTransaction=" + dateTransaction +
-//                '}';
-//    }
 }
