@@ -1,11 +1,13 @@
 package com.Mindhubcohort55.Homebanking.services;
 
 import com.Mindhubcohort55.Homebanking.dtos.AccountDto;
+import com.Mindhubcohort55.Homebanking.dtos.MakeTransactionDto;
 import com.Mindhubcohort55.Homebanking.models.Account;
 import com.Mindhubcohort55.Homebanking.models.Client;
 import com.Mindhubcohort55.Homebanking.repositories.AccountRepository;
 import com.Mindhubcohort55.Homebanking.repositories.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -47,5 +49,8 @@ public interface AccountService {
 
         // Obtiene todas las cuentas asociadas a un cliente por nombre.
         List<Account> getAccByClient(Client client);
+
+        // Realiza una transacción entre cuentas.
+        ResponseEntity<?> makeTransaction(MakeTransactionDto makeTransactionDto, String email);
 }
 

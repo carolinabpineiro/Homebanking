@@ -8,6 +8,7 @@ import com.Mindhubcohort55.Homebanking.models.CardType;
 import com.Mindhubcohort55.Homebanking.models.Client;
 import com.Mindhubcohort55.Homebanking.repositories.CardRepository;
 import com.Mindhubcohort55.Homebanking.repositories.ClientRepository;
+import com.Mindhubcohort55.Homebanking.services.CardService;
 import com.Mindhubcohort55.Homebanking.utils.CardNumberGenerator;
 import com.Mindhubcohort55.Homebanking.utils.CvvGenerator;
 import jakarta.transaction.Transactional;
@@ -29,12 +30,11 @@ public class CardController {
     private ClientRepository clientRepository;
 
     @Autowired
-    private CardRepository cardRepository;
+    private CardService cardService; // Inyectar el servicio para delegar la lógica de negocio
 
     @Transactional
     @PostMapping("/cards")
     public ResponseEntity<?> createCard(@RequestBody CreateCardDto createCardDto, Authentication authentication) {
-
         try {
             // Obtener el cliente autenticado usando el repositorio
             Client client = clientRepository.findByEmail(authentication.getName());
@@ -43,18 +43,20 @@ public class CardController {
                 return new ResponseEntity<>("Client not found", HttpStatus.FORBIDDEN);
             }
 
+            // Crear una nueva tarjeta utilizando el servicio
             Card newCard = new Card(
                     createCardDto.cardType(),
                     createCardDto.cardColor(),
                     createCardDto.cardNumber(),
                     createCardDto.cvv(),
-                    createCardDto.expiryDate(), // Esto es `fromDate`
-                    createCardDto.issueDate(),  // Esto es `thruDate`
-                    "Card Holder Name", // Asegúrate de agregar el nombre del titular
+                    createCardDto.expiryDate(), // `expiryDate` como `fromDate`
+                    createCardDto.issueDate(),  // `issueDate` como `thruDate`
+                    "Card Holder Name", // Asignar el nombre del titular correctamente
                     client
             );
-            client.addCard(newCard);
-            cardRepository.save(newCard);
+
+            // Delegar la creación de la tarjeta al servicio
+            cardService.saveCard(newCard);
 
             return new ResponseEntity<>("Card created successfully", HttpStatus.CREATED);
         } catch (Exception e) {
