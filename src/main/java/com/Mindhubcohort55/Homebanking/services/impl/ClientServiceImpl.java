@@ -43,7 +43,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public void saveCLient(Client client) {
-        // Método no implementado
+
     }
 
     @Override

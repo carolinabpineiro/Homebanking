@@ -14,43 +14,42 @@ import java.util.List;
 
 public interface AccountService {
 
-        // Crea una cuenta predeterminada para el cliente especificado.
+        // Crea una cuenta predeterminada para un nuevo cliente.
+        Account createDefaultAccountForNewClient();
+
+        // Crea una cuenta predeterminada para un cliente existente.
         Account createDefaultAccount(Long clientId);
 
         // Obtiene una cuenta por su ID.
         Account getAccountById(long id);
 
         // Guarda una cuenta en la base de datos.
-        void saveAcc(Account account);
+        void saveAccount(Account account);
 
         // Obtiene todas las cuentas.
         List<Account> getAccounts();
 
         // Obtiene una cuenta por su número.
-        Account getAccByNumber(String number);
+        Account getAccountByNumber(String number);
 
-        // Obtiene cuentas por estado (activa/inactiva).
-        List<Account> getAccByStatus(boolean status);
+        // Obtiene cuentas por estado (activo/inactivo).
+        List<Account> getAccountsByStatus(boolean status);
 
         // Obtiene todas las cuentas en formato DTO.
         List<AccountDto> getAccountsDTO();
 
-        // Guarda una cuenta en la base de datos.
-        void saveAccount(Account account);
-
-        // Obtiene una cuenta en formato DTO por su ID.
+        // Obtiene un DTO de cuenta por su ID.
         AccountDto getAccountDTOById(Long id);
 
-        // Obtiene una cuenta por su número.
-        Account getAccountByNumber(String number);
-
-        // Obtiene todas las cuentas asociadas a un cliente.
-        List<Account> getAccByOwner(Client client);
-
-        // Obtiene todas las cuentas asociadas a un cliente por nombre.
-        List<Account> getAccByClient(Client client);
+        // Obtiene cuentas asociadas a un cliente.
+        List<Account> getAccountsByClient(Client client);
 
         // Realiza una transacción entre cuentas.
         ResponseEntity<?> makeTransaction(MakeTransactionDto makeTransactionDto, String email);
-}
 
+        // Elimina una cuenta de la base de datos.
+        void deleteAccount(Long accountId);
+
+        // Actualiza el balance de una cuenta.
+        void updateAccountBalance(Long accountId, double newBalance);
+}

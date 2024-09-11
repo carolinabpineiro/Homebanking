@@ -4,6 +4,7 @@ import com.Mindhubcohort55.Homebanking.dtos.ClientDto;
 import com.Mindhubcohort55.Homebanking.models.Client;
 import com.Mindhubcohort55.Homebanking.repositories.AccountRepository;
 import com.Mindhubcohort55.Homebanking.repositories.ClientRepository;
+import com.Mindhubcohort55.Homebanking.services.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,24 +20,21 @@ import java.util.stream.Collectors;
 public class ClientController {
 
     @Autowired
-    private ClientRepository clientRepository;
+    private ClientService clientService;
 
     @GetMapping("/")
     public ResponseEntity<List<ClientDto>> getAllClients() {
-        List<Client> allClients = clientRepository.findAll();
-        List<ClientDto> allClientsDto = allClients.stream().map(ClientDto::new).collect(Collectors.toList());
+        List<ClientDto> allClientsDto = clientService.getClientsDTO();
         return new ResponseEntity<>(allClientsDto, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getClientById(@PathVariable Long id) {
-        Optional<Client> clientById = clientRepository.findById(id);
+        ClientDto clientDto = clientService.getClientDTO(id);
 
-        if (clientById.isEmpty()) {
+        if (clientDto == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
-            Client clientData = clientById.get();
-            ClientDto clientDto = new ClientDto(clientData);
             return new ResponseEntity<>(clientDto, HttpStatus.OK);
         }
     }

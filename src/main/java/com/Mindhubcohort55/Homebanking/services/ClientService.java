@@ -20,6 +20,8 @@ public interface ClientService {
     // Busca un cliente por su ID.
     Client findClientById(Long id);
 
+    void saveCLient(Client client);
+
     // Guarda un cliente en la base de datos.
     void saveClient(Client client);
 

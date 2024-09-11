@@ -7,6 +7,7 @@ import com.Mindhubcohort55.Homebanking.models.Account;
 import com.Mindhubcohort55.Homebanking.models.Client;
 import com.Mindhubcohort55.Homebanking.repositories.AccountRepository;
 import com.Mindhubcohort55.Homebanking.repositories.ClientRepository;
+import com.Mindhubcohort55.Homebanking.services.AccountService;
 import com.Mindhubcohort55.Homebanking.servicesSecurity.JwtUtilService;
 import com.Mindhubcohort55.Homebanking.utils.AccountNumberGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 
-import static com.Mindhubcohort55.Homebanking.utils.AccountNumberGenerator.accountRepository;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -43,7 +43,7 @@ public class AuthController {
     private ClientRepository clientRepository;
 
     @Autowired
-    private AccountRepository accountRepository; // Inyecta el repositorio de cuentas
+    private AccountService accountService; // Usa el servicio de cuentas en lugar de AccountRepository directamente
 
     // Login
     @PostMapping("/login")
@@ -74,6 +74,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody RegisterDto registerDto) {
         try {
+            // Validaciones de campos vacíos
             if (registerDto.firstName().isBlank()) {
                 return new ResponseEntity<>("The Name field must not be empty", HttpStatus.BAD_REQUEST);
             }
@@ -90,10 +91,12 @@ public class AuthController {
                 return new ResponseEntity<>("The Email field must not be empty", HttpStatus.BAD_REQUEST);
             }
 
+            // Verificación de existencia de email
             if (clientRepository.existsByEmail(registerDto.email())) {
                 return new ResponseEntity<>("The Email entered is already registered", HttpStatus.FORBIDDEN);
             }
 
+            // Creación del nuevo cliente
             Client newClient = new Client(
                     registerDto.firstName(),
                     registerDto.lastName(),
@@ -101,17 +104,13 @@ public class AuthController {
                     passwordEncoder.encode(registerDto.password())
             );
 
-            Account defaultAccount = new Account(
-                    AccountNumberGenerator.makeAccountNumber(),
-                    LocalDateTime.now(),
-                    0.00,
-                    true  // O false, dependiendo del estado inicial que desees
-            );
+            // Creación de la cuenta por defecto para el cliente
+            Account defaultAccount = accountService.createDefaultAccountForNewClient(); // Método de AccountService
 
-            // Usa addAccount en lugar de addAccounts
+            // Asignar la cuenta al cliente
             newClient.addAccount(defaultAccount);
 
-            // Guarda el cliente en la base de datos; debido al CascadeType.ALL, la cuenta se guarda automáticamente
+            // Guardar cliente con su nueva cuenta
             clientRepository.save(newClient);
 
             return new ResponseEntity<>("Client created", HttpStatus.CREATED);
@@ -120,6 +119,7 @@ public class AuthController {
         }
     }
 
+    // Obtener cliente actual
     @GetMapping("/current")
     public ResponseEntity<?> getClient(Authentication authentication) {
         Client client = clientRepository.findByEmail(authentication.getName());
