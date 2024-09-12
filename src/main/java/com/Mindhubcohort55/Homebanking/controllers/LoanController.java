@@ -1,5 +1,3 @@
-package com.Mindhubcohort55.Homebanking.controllers;
-
 import com.Mindhubcohort55.Homebanking.dtos.LoanApplicationDTO;
 import com.Mindhubcohort55.Homebanking.dtos.LoanDto;
 import com.Mindhubcohort55.Homebanking.models.*;
@@ -15,19 +13,20 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
+@RestController
+@RequestMapping("/api")
 public class LoanController {
 
     @Autowired
-    ClientService clientService;
+    private ClientService clientService;
     @Autowired
-    AccountService accountService;
+    private AccountService accountService;
     @Autowired
-    TransactionService transactionService;
+    private TransactionService transactionService;
     @Autowired
-    LoanService loanService;
+    private LoanService loanService;
     @Autowired
-    ClientLoanService clientLoanService;
+    private ClientLoanService clientLoanService;
 
     @GetMapping("/loans")
     public List<LoanDto> getLoans() {
@@ -37,11 +36,12 @@ public class LoanController {
     @Transactional
     @PostMapping("/loans")
     public ResponseEntity<Object> createLoan(@RequestBody LoanApplicationDTO loanApplicationDTO, Authentication authentication) {
+        String email = authentication.getName();
+        Client client = clientService.getClientByEmail(email);
         Loan loan = loanService.findLoanById(loanApplicationDTO.getId());
         Account account = accountService.getAccountByNumber(loanApplicationDTO.getDestinationAccountNumber());
-        Client client = clientService.getClientCurrent(authentication);
 
-        if (loanApplicationDTO.getAmount() == 0 || loanApplicationDTO.getPayment() == 0) {
+        if (loanApplicationDTO.getAmount() <= 0 || loanApplicationDTO.getPayment() <= 0) {
             return new ResponseEntity<>("Missing data", HttpStatus.FORBIDDEN);
         }
 
@@ -65,7 +65,6 @@ public class LoanController {
             return new ResponseEntity<>("The destination account does not belong to the client", HttpStatus.FORBIDDEN);
         }
 
-        // Verificación si el cliente ya solicitó este tipo de préstamo
         boolean loanAlreadyRequested = client.getClientLoans().stream()
                 .anyMatch(clientLoan -> clientLoan.getLoan().getId() == loan.getId());
 
@@ -73,25 +72,28 @@ public class LoanController {
             return new ResponseEntity<>("This kind of loan has already been requested", HttpStatus.FORBIDDEN);
         }
 
-        // Creación del nuevo ClientLoan
         ClientLoan clientLoan = new ClientLoan(loanApplicationDTO.getAmount() * 1.20, loanApplicationDTO.getPayment());
         clientLoan.setClient(client);
         clientLoan.setLoan(loan);
         clientLoanService.saveClientLoan(clientLoan);
 
-        // Creación de la transacción con TransactionType correctamente asignado
-        Transaction creditTransaction = new Transaction(
-                TransactionType.CREDIT,                  // Tipo de transacción
-                loanApplicationDTO.getAmount(),          // Monto de la transacción
-                loan.getName() + " Loan approved",      // Descripción
-                LocalDateTime.now(),                    // Fecha de la transacción
-                account                                // Cuenta asociada
-        );
+        if (account != null && loanApplicationDTO.getAmount() > 0) {
+            Transaction creditTransaction = new Transaction(
+                    TransactionType.CREDIT,
+                    loanApplicationDTO.getAmount(),
+                    loan.getName() + " Loan approved",
+                    LocalDateTime.now(),
+                    account
+            );
 
-        // Actualización del saldo de la cuenta
-        account.setBalance(account.getBalance() + loanApplicationDTO.getAmount());
-        accountService.saveAccount(account);
+            transactionService.makeTransaction(creditTransaction, email);
 
-        return new ResponseEntity<>("The loan has been successfully requested", HttpStatus.CREATED);
+            account.setBalance(account.getBalance() + loanApplicationDTO.getAmount());
+            accountService.saveAccount(account);
+
+            return new ResponseEntity<>("The loan has been successfully requested", HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>("Invalid transaction data", HttpStatus.FORBIDDEN);
+        }
     }
 }

@@ -19,42 +19,35 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public List<ClientDto> getClientsDTO() {
-        // Obtener todos los clientes y convertirlos a DTOs
-        return clientRepository.findAll().stream().map(ClientDto::new).collect(Collectors.toList());
+        List<Client> clients = clientRepository.findAll();
+        return clients.stream().map(ClientDto::new).collect(Collectors.toList());
     }
 
     @Override
-    public Client getClientCurrent(Authentication authentication) {
-        // Obtener el cliente autenticado por su email
-        return clientRepository.findByEmail(authentication.getName());
+    public ClientDto getClientCurrent(Authentication authentication) {
+        String email = authentication.getName();
+        Client client = clientRepository.findByEmail(email);
+        return client != null ? new ClientDto(client) : null;
     }
 
     @Override
     public ClientDto getClientDTO(Long id) {
-        // Obtener cliente por ID y convertirlo a DTO
-        return clientRepository.findById(id).map(ClientDto::new).orElse(null);
+        Client client = clientRepository.findById(id).orElse(null);
+        return client != null ? new ClientDto(client) : null;
     }
 
     @Override
     public Client findClientById(Long id) {
-        // Buscar cliente por ID
         return clientRepository.findById(id).orElse(null);
     }
 
     @Override
-    public void saveCLient(Client client) {
-
-    }
-
-    @Override
     public void saveClient(Client client) {
-        // Guardar cliente
         clientRepository.save(client);
     }
 
     @Override
     public Client getClientByEmail(String email) {
-        // Buscar cliente por email
         return clientRepository.findByEmail(email);
     }
 }

@@ -1,7 +1,5 @@
 package com.Mindhubcohort55.Homebanking.models;
 
-import com.Mindhubcohort55.Homebanking.utils.CardNumberGenerator;
-import com.Mindhubcohort55.Homebanking.utils.CvvGenerator;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -10,33 +8,33 @@ public class Card {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // ID único de la tarjeta, generado automáticamente
+    private Long id;
 
     @Enumerated(EnumType.STRING)
-    private CardType cardType; // Tipo de tarjeta (por ejemplo, débito, crédito)
+    private CardType cardType;
 
     @Enumerated(EnumType.STRING)
-    private CardColor cardColor; // Color de la tarjeta (por ejemplo, azul, rojo)
+    private CardColor cardColor;
 
-    private String cardNumber; // Número de tarjeta, debe ser único
+    private String cardNumber;
 
-    private String cvv; // Código de verificación de la tarjeta
+    private String cvv;
 
-    private LocalDate fromDate; // Fecha desde la cual la tarjeta es válida
+    private LocalDate fromDate;
 
-    private LocalDate thruDate; // Fecha hasta la cual la tarjeta es válida
+    private LocalDate thruDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
-    private Client client; // Cliente asociado con la tarjeta
+    private Client client;  // Relación con cliente
 
-    private String cardHolder; // Nombre del titular de la tarjeta
+    private String cardHolder;
 
-    // Constructor vacío
+    // Constructor vacío necesario para JPA
     public Card() {
     }
 
-    // Constructor con parámetros para inicializar todos los atributos
+    // Constructor parametrizado con cliente
     public Card(CardType cardType, CardColor cardColor, String cardNumber, String cvv, LocalDate fromDate, LocalDate thruDate, String cardHolder, Client client) {
         this.cardType = cardType;
         this.cardColor = cardColor;

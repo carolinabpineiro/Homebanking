@@ -7,24 +7,10 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 
 public interface ClientService {
-
-    // Obtiene todos los clientes en formato DTO.
     List<ClientDto> getClientsDTO();
-
-    // Obtiene el cliente autenticado actual.
-    Client getClientCurrent(Authentication authentication);
-
-    // Obtiene un cliente en formato DTO por su ID.
+    ClientDto getClientCurrent(Authentication authentication); // Devuelve ClientDto del cliente autenticado
     ClientDto getClientDTO(Long id);
-
-    // Busca un cliente por su ID.
-    Client findClientById(Long id);
-
-    void saveCLient(Client client);
-
-    // Guarda un cliente en la base de datos.
+    Client findClientById(Long id); // Devuelve Client por ID
     void saveClient(Client client);
-
-    // Obtiene un cliente por su email.
-    Client getClientByEmail(String email);
+    Client getClientByEmail(String email); // Busca un cliente por email
 }

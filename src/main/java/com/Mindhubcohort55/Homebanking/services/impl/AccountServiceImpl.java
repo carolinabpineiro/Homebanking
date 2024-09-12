@@ -20,14 +20,13 @@ import java.util.stream.Collectors;
 @Service
 public class AccountServiceImpl implements AccountService {
 
-    private final AccountRepository accountRepository;
-    private final ClientService clientService;  // Usamos el servicio en vez del repositorio
+    @Autowired
+    private  AccountRepository accountRepository;
 
     @Autowired
-    public AccountServiceImpl(AccountRepository accountRepository, ClientService clientService) {
-        this.accountRepository = accountRepository;
-        this.clientService = clientService;  // Inyectamos el servicio
-    }
+    private  ClientService clientService;
+
+
 
     @Override
     public Account createDefaultAccountForNewClient() {

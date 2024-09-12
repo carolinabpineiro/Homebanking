@@ -1,21 +1,25 @@
 package com.Mindhubcohort55.Homebanking.utils;
 
+import com.Mindhubcohort55.Homebanking.repositories.CardRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.security.SecureRandom;
 
 @Component
 public class CardNumberGenerator {
 
-    public static String makeCardNumber() {
+    private static final SecureRandom RANDOM = new SecureRandom();
 
-        StringBuilder cardNumberBuilder = new StringBuilder();
+    public static String getRandomCardNumber() {
+        return String.format("%04d-%04d-%04d-%04d",
+                RANDOM.nextInt(10000),
+                RANDOM.nextInt(10000),
+                RANDOM.nextInt(10000),
+                RANDOM.nextInt(10000));
+    }
 
-        for (int i = 0; i < 4; i++) {
-            String randomNumbers = String.format("%04d", (int) (Math.random() * (9999 - 1) + 1));
-            cardNumberBuilder.append(randomNumbers);
-            if (i < 3) {
-                cardNumberBuilder.append("-");
-            }
-        }
-        return cardNumberBuilder.toString();
+    public static String getRandomCvvNumber() {
+        return String.format("%03d", 100 + RANDOM.nextInt(900)); // Genera un número CVV entre 100 y 999
     }
 }

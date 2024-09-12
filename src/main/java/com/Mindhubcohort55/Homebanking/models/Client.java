@@ -13,21 +13,21 @@ public class Client {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // ID único del cliente, generado automáticamente
+    private Long id;
 
-    private String firstName; // Nombre del cliente
-    private String lastName; // Apellido del cliente
-    private String email; // Correo electrónico del cliente
-    private String password; // Contraseña del cliente
-
-    @OneToMany(mappedBy = "client", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<Account> accounts = new HashSet<>(); // Conjunto de cuentas asociadas al cliente
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String password;
 
     @OneToMany(mappedBy = "client", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<Card> cards = new HashSet<>(); // Conjunto de tarjetas asociadas al cliente
+    private Set<Account> accounts = new HashSet<>();
 
     @OneToMany(mappedBy = "client", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<ClientLoan> clientLoans = new HashSet<>(); // Conjunto de préstamos asociados al cliente
+    private Set<Card> cards = new HashSet<>();
+
+    @OneToMany(mappedBy = "client", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<ClientLoan> clientLoans = new HashSet<>();
 
     // Constructor vacío
     public Client() {
@@ -120,19 +120,19 @@ public class Client {
                 '}';
     }
 
-    // Métodos para añadir relaciones bidireccionales
+    // Métodos para relaciones bidireccionales
     public void addAccount(Account account) {
-        this.accounts.add(account); // Añade una cuenta al conjunto de cuentas
-        account.setClient(this); // Establece el cliente en la cuenta
+        this.accounts.add(account);
+        account.setClient(this);
     }
 
     public void addCard(Card card) {
-        this.cards.add(card); // Añade una tarjeta al conjunto de tarjetas
-        card.setClient(this); // Establece el cliente en la tarjeta
+        this.cards.add(card);
+        card.setClient(this);  // Asegurar relación bidireccional
     }
 
     public void addClientLoan(ClientLoan clientLoan) {
-        this.clientLoans.add(clientLoan); // Añade un préstamo al conjunto de préstamos
-        clientLoan.setClient(this); // Establece el cliente en el préstamo
+        this.clientLoans.add(clientLoan);
+        clientLoan.setClient(this);
     }
 }

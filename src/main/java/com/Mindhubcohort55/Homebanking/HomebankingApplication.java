@@ -4,7 +4,6 @@ import com.Mindhubcohort55.Homebanking.models.*;
 import com.Mindhubcohort55.Homebanking.repositories.*;
 import com.Mindhubcohort55.Homebanking.services.ClientLoanService;
 import com.Mindhubcohort55.Homebanking.utils.CardNumberGenerator;
-import com.Mindhubcohort55.Homebanking.utils.CvvGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -14,7 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 
 @SpringBootApplication
 public class HomebankingApplication {
@@ -27,6 +25,7 @@ public class HomebankingApplication {
 	private final ClientLoanRepository clientLoanRepository;
 	private final CardRepository cardRepository;
 	private final ClientLoanService clientLoanService;
+	private final CardNumberGenerator cardNumberGenerator;
 
 	@Autowired
 	public HomebankingApplication(PasswordEncoder passwordEncoder,
@@ -36,7 +35,8 @@ public class HomebankingApplication {
 								  LoanRepository loanRepository,
 								  ClientLoanRepository clientLoanRepository,
 								  CardRepository cardRepository,
-								  ClientLoanService clientLoanService) {
+								  ClientLoanService clientLoanService,
+								  CardNumberGenerator cardNumberGenerator) {
 		this.passwordEncoder = passwordEncoder;
 		this.clientRepository = clientRepository;
 		this.accountRepository = accountRepository;
@@ -45,6 +45,7 @@ public class HomebankingApplication {
 		this.clientLoanRepository = clientLoanRepository;
 		this.cardRepository = cardRepository;
 		this.clientLoanService = clientLoanService;
+		this.cardNumberGenerator = cardNumberGenerator;
 	}
 
 	public static void main(String[] args) {
@@ -123,11 +124,11 @@ public class HomebankingApplication {
 			accountRepository.save(adminAccount);
 
 			// Ahora que los clientes están guardados, podemos guardar las tarjetas
-			Card cardGold = new Card(CardType.DEBIT, CardColor.GOLD, CardNumberGenerator.makeCardNumber(), CvvGenerator.cvvNumber(), LocalDate.now(), LocalDate.now().plusYears(5), "Card Holder Name", melba);
+			Card cardGold = new Card(CardType.DEBIT, CardColor.GOLD, cardNumberGenerator.getRandomCardNumber(), cardNumberGenerator.getRandomCvvNumber(), LocalDate.now(), LocalDate.now().plusYears(5), "Card Holder Name", melba);
 			melba.addCard(cardGold);
 			cardRepository.save(cardGold);
 
-			Card cardTitanium = new Card(CardType.CREDIT, CardColor.TITANIUM, CardNumberGenerator.makeCardNumber(), CvvGenerator.cvvNumber(), LocalDate.now(), LocalDate.now().plusYears(5), "Card Holder Name", admin);
+			Card cardTitanium = new Card(CardType.CREDIT, CardColor.TITANIUM, cardNumberGenerator.getRandomCardNumber(), cardNumberGenerator.getRandomCvvNumber(), LocalDate.now(), LocalDate.now().plusYears(5), "Card Holder Name", admin);
 			admin.addCard(cardTitanium);
 			cardRepository.save(cardTitanium);
 
@@ -157,7 +158,7 @@ public class HomebankingApplication {
 			accountRepository.save(accountMariano2);
 
 			// Tarjetas para Mariano
-			Card cardSilver = new Card(CardType.DEBIT, CardColor.SILVER, CardNumberGenerator.makeCardNumber(), CvvGenerator.cvvNumber(), LocalDate.now(), LocalDate.now().plusYears(5), "Card Holder Name", mariano);
+			Card cardSilver = new Card(CardType.DEBIT, CardColor.SILVER, cardNumberGenerator.getRandomCardNumber(), cardNumberGenerator.getRandomCvvNumber(), LocalDate.now(), LocalDate.now().plusYears(5), "Card Holder Name", mariano);
 			mariano.addCard(cardSilver);
 			cardRepository.save(cardSilver);
 
@@ -186,7 +187,7 @@ public class HomebankingApplication {
 			accountRepository.save(accountDina2);
 
 			// Tarjetas para Dina
-			Card cardGoldDina = new Card(CardType.CREDIT, CardColor.GOLD, CardNumberGenerator.makeCardNumber(), CvvGenerator.cvvNumber(), LocalDate.now(), LocalDate.now().plusYears(5), "Card Holder Name", dina);
+			Card cardGoldDina = new Card(CardType.CREDIT, CardColor.GOLD, cardNumberGenerator.getRandomCardNumber(), cardNumberGenerator.getRandomCvvNumber(), LocalDate.now(), LocalDate.now().plusYears(5), "Card Holder Name", dina);
 			dina.addCard(cardGoldDina);
 			cardRepository.save(cardGoldDina);
 
@@ -215,7 +216,7 @@ public class HomebankingApplication {
 			accountRepository.save(accountLuis2);
 
 			// Tarjetas para Luis
-			Card cardTitaniumLuis = new Card(CardType.DEBIT, CardColor.TITANIUM, CardNumberGenerator.makeCardNumber(), CvvGenerator.cvvNumber(), LocalDate.now(), LocalDate.now().plusYears(5), "Card Holder Name", luis);
+			Card cardTitaniumLuis = new Card(CardType.DEBIT, CardColor.TITANIUM, cardNumberGenerator.getRandomCardNumber(), cardNumberGenerator.getRandomCvvNumber(), LocalDate.now(), LocalDate.now().plusYears(5), "Card Holder Name", luis);
 			luis.addCard(cardTitaniumLuis);
 			cardRepository.save(cardTitaniumLuis);
 		};

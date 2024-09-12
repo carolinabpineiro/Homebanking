@@ -44,12 +44,12 @@ public interface AccountService {
         // Obtiene cuentas asociadas a un cliente.
         List<Account> getAccountsByClient(Client client);
 
-        // Realiza una transacción entre cuentas.
-        ResponseEntity<?> makeTransaction(MakeTransactionDto makeTransactionDto, String email);
-
         // Elimina una cuenta de la base de datos.
         void deleteAccount(Long accountId);
 
         // Actualiza el balance de una cuenta.
         void updateAccountBalance(Long accountId, double newBalance);
+
+        // Actualiza una cuenta en la base de datos.
+        void updateAccount(Account account);
 }
