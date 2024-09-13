@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/api/clients/current/cards")
+@RequestMapping("/api/clients/current")
 public class CardController {
 
     @Autowired
@@ -26,7 +26,7 @@ public class CardController {
     @Autowired
     private ClientRepository clientRepository;
 
-    @PostMapping
+    @PostMapping ("/cards")
     public ResponseEntity<Void> createCard(@RequestBody CreateCardDto createCardDto, Authentication authentication) {
         // Obtener el cliente autenticado
         Client client = clientRepository.findByEmail(authentication.getName());
@@ -63,7 +63,7 @@ public class CardController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping
+    @GetMapping ("/cards")
     public ResponseEntity<Set<CardDto>> getCards(Authentication authentication) {
         // Obtener el cliente autenticado
         Client client = clientRepository.findByEmail(authentication.getName());

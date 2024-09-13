@@ -39,8 +39,14 @@ public class WebConfig {
                 .authorizeHttpRequests(authorize ->
                         authorize
                                 .requestMatchers("/api/auth/login", "/api/auth/signup", "/h2-console/**").permitAll()
-                                .requestMatchers("/api/clients/current/**").hasRole("CLIENT")
-                                .requestMatchers("/api/clients/**", "/api/accounts/**").hasRole("ADMIN")
+                                .requestMatchers(
+                                        "/api/clients/acccounts/current",
+                                        "/api/auth/current",
+                                        "api/clients/current/cards",
+                                        "api/loans/",
+                                        "api/transactions"
+                                ).hasRole("CLIENT")
+                                .requestMatchers("/api/clients/**").hasRole("ADMIN")
                 )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

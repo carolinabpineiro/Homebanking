@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/clients/current/accounts")
+@RequestMapping("/api/clients/accounts")
 public class AccountController {
 
     @Autowired
@@ -29,7 +29,7 @@ public class AccountController {
     private ClientService clientService;
 
     // Crear una nueva cuenta para el cliente autenticado
-    @PostMapping
+    @PostMapping ("/current")
     public ResponseEntity<?> createAccount(Authentication authentication) {
         String email = authentication.getName();
         Client client = clientService.getClientByEmail(email);
@@ -57,7 +57,7 @@ public class AccountController {
     }
 
     // Obtener todas las cuentas del cliente autenticado
-    @GetMapping
+    @GetMapping ("/current")
     public ResponseEntity<List<AccountDto>> getAccounts(Authentication authentication) {
         String email = authentication.getName();
         Client client = clientService.getClientByEmail(email);
