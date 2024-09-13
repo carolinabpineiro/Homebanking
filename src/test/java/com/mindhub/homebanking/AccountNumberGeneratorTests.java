@@ -4,13 +4,15 @@ import com.Mindhubcohort55.Homebanking.utils.AccountNumberGenerator;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 public class AccountNumberGeneratorTests {
 
-    @Autowired
+    @MockBean // Mock para simular el repositorio
+    private AccountRepository accountRepository;
 
 
     @Test
