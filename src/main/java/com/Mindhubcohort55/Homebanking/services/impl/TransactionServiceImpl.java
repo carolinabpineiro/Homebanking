@@ -12,6 +12,9 @@ import com.Mindhubcohort55.Homebanking.services.ClientService;
 import com.Mindhubcohort55.Homebanking.services.TransactionService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -34,43 +37,21 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Transactional
     @Override
-    public void makeTransaction(MakeTransactionDto makeTransactionDto, String clientEmail) {
-        // Validaciones
-        if (makeTransactionDto.sourceAccount().isBlank() || makeTransactionDto.destinationAccount().isBlank()) {
-            throw new IllegalArgumentException("Source or destination account is missing");
+    public ResponseEntity<String> makeTransaction(MakeTransactionDto makeTransactionDto, Authentication authentication) {
+        ResponseEntity<String> validationResponse = validateTransaction(makeTransactionDto, authentication);
+        if (validationResponse.getStatusCode() != HttpStatus.OK) {
+            return validationResponse;
         }
 
-        if (makeTransactionDto.amount() == null || makeTransactionDto.amount() <= 0) {
-            throw new IllegalArgumentException("Amount must be greater than zero");
-        }
-
-        if (makeTransactionDto.description().isBlank()) {
-            throw new IllegalArgumentException("Description is missing");
-        }
-
-        // Obtener cliente autenticado
-        Client client = clientService.getClientByEmail(clientEmail);
-
-        // Verificar cuentas
+        // Realiza la transacción después de la validación
+        Client client = clientService.getClientByEmail(authentication.getName());
         Account sourceAccount = accountService.getAccountByNumber(makeTransactionDto.sourceAccount());
         Account destinationAccount = accountService.getAccountByNumber(makeTransactionDto.destinationAccount());
-
-        if (!sourceAccount.getClient().equals(client)) {
-            throw new IllegalArgumentException("Source account does not belong to the authenticated client");
-        }
-
-        if (sourceAccount.getBalance() < makeTransactionDto.amount()) {
-            throw new IllegalArgumentException("Insufficient funds in the source account");
-        }
-
-        if (sourceAccount.equals(destinationAccount)) {
-            throw new IllegalArgumentException("Source and destination accounts must be different");
-        }
 
         // Crear las transacciones
         Transaction sourceTransaction = new Transaction(
                 TransactionType.DEBIT,
-                -makeTransactionDto.amount(),
+                makeTransactionDto.amount(),
                 makeTransactionDto.description(),
                 LocalDateTime.now(),
                 sourceAccount
@@ -95,6 +76,48 @@ public class TransactionServiceImpl implements TransactionService {
         transactionRepository.save(destinationTransaction);
         accountService.updateAccount(sourceAccount);
         accountService.updateAccount(destinationAccount);
+
+        return new ResponseEntity<>("Transaction completed successfully", HttpStatus.CREATED);
+    }
+
+    @Override
+    public ResponseEntity<String> validateTransaction(MakeTransactionDto makeTransactionDto, Authentication authentication) {
+        // Validaciones
+        if (makeTransactionDto.sourceAccount().isBlank() || makeTransactionDto.destinationAccount().isBlank()) {
+            return new ResponseEntity<>("Source or destination account is missing", HttpStatus.FORBIDDEN);
+        }
+
+        if (makeTransactionDto.amount() <= 0) {
+            return new ResponseEntity<>("Amount must be greater than zero", HttpStatus.FORBIDDEN);
+        }
+
+        if (makeTransactionDto.description().isBlank()) {
+            return new ResponseEntity<>("Description is missing", HttpStatus.FORBIDDEN);
+        }
+
+        // Obtener cliente autenticado
+        Client client = clientService.getClientByEmail(authentication.getName());
+
+        // Verificar cuentas
+        Account sourceAccount = accountService.getAccountByNumber(makeTransactionDto.sourceAccount());
+        Account destinationAccount = accountService.getAccountByNumber(makeTransactionDto.destinationAccount());
+
+        if (sourceAccount == null || destinationAccount == null) {
+            return new ResponseEntity<>("One or both accounts do not exist", HttpStatus.FORBIDDEN);
+        }
+
+        if (!sourceAccount.getClient().equals(client)) {
+            return new ResponseEntity<>("Source account does not belong to the authenticated client", HttpStatus.FORBIDDEN);
+        }
+
+        if (sourceAccount.getBalance() < makeTransactionDto.amount()) {
+            return new ResponseEntity<>("Insufficient funds in the source account", HttpStatus.FORBIDDEN);
+        }
+
+        if (sourceAccount.equals(destinationAccount)) {
+            return new ResponseEntity<>("Source and destination accounts must be different", HttpStatus.FORBIDDEN);
+        }
+
+        return new ResponseEntity<>("Validation successful", HttpStatus.OK);
     }
 }
-

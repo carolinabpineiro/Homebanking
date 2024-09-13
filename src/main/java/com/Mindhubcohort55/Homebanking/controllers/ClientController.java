@@ -23,29 +23,27 @@ public class ClientController {
     @Autowired
     private ClientService clientService;
 
+    // Obtener todos los clientes
     @GetMapping("/")
     public ResponseEntity<List<ClientDto>> getAllClients() {
+        // Aquí usamos el método del segundo código para obtener todos los clientes
         List<ClientDto> allClientsDto = clientService.getClientsDTO();
         return new ResponseEntity<>(allClientsDto, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getClientById(@PathVariable Long id) {
-        ClientDto clientDto = clientService.getClientDTO(id);
-        if (clientDto == null) {
+        // Primero obtenemos el cliente por ID
+        Client client = clientService.findClientById(id);
+
+        if (client == null) {
+            // Si el cliente no existe, devolvemos un 404
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
+            // Si el cliente existe, obtenemos su DTO
+            ClientDto clientDto = clientService.getClientDTO(id);
             return new ResponseEntity<>(clientDto, HttpStatus.OK);
         }
     }
 
-    @GetMapping("/current")
-    public ResponseEntity<ClientDto> getCurrentClient(Authentication authentication) {
-        ClientDto clientDto = clientService.getClientCurrent(authentication);
-        if (clientDto == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else {
-            return new ResponseEntity<>(clientDto, HttpStatus.OK);
-        }
-    }
 }
