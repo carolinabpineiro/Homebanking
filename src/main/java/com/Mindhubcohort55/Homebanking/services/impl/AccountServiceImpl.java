@@ -5,7 +5,6 @@ import com.Mindhubcohort55.Homebanking.dtos.MakeTransactionDto;
 import com.Mindhubcohort55.Homebanking.models.Account;
 import com.Mindhubcohort55.Homebanking.models.Client;
 import com.Mindhubcohort55.Homebanking.repositories.AccountRepository;
-import com.Mindhubcohort55.Homebanking.repositories.ClientRepository;
 import com.Mindhubcohort55.Homebanking.services.AccountService;
 import com.Mindhubcohort55.Homebanking.services.ClientService;
 import com.Mindhubcohort55.Homebanking.utils.AccountNumberGenerator;
@@ -21,12 +20,10 @@ import java.util.stream.Collectors;
 public class AccountServiceImpl implements AccountService {
 
     @Autowired
-    private  AccountRepository accountRepository;
+    private AccountRepository accountRepository;
 
     @Autowired
-    private  ClientService clientService;
-
-
+    private ClientService clientService;
 
     @Override
     public Account createDefaultAccountForNewClient() {
@@ -37,7 +34,6 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account createDefaultAccount(Long clientId) {
-        // Usamos el servicio en lugar del repositorio, y validamos si el cliente es null
         Client client = clientService.findClientById(clientId);
 
         if (client == null) {
@@ -54,7 +50,6 @@ public class AccountServiceImpl implements AccountService {
         defaultAccount.setClient(client);
         return accountRepository.save(defaultAccount);
     }
-
 
     @Override
     public Account getAccountById(long id) {
@@ -100,7 +95,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public ResponseEntity<?> makeTransaction(MakeTransactionDto makeTransactionDto, String email) {
-        // Aquí deberías implementar la lógica para realizar una transacción.
+        // Implement the transaction logic here
         return null;
     }
 
@@ -115,5 +110,10 @@ public class AccountServiceImpl implements AccountService {
                 .orElseThrow(() -> new RuntimeException("Account not found"));
         account.setBalance(newBalance);
         accountRepository.save(account);
+    }
+
+    @Override
+    public void updateAccount(Account account) {
+        accountRepository.save(account); // Save the updated account
     }
 }

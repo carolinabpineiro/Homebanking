@@ -3,12 +3,9 @@ package com.Mindhubcohort55.Homebanking.controllers;
 import com.Mindhubcohort55.Homebanking.dtos.CardDto;
 import com.Mindhubcohort55.Homebanking.dtos.CreateCardDto;
 import com.Mindhubcohort55.Homebanking.models.Card;
-import com.Mindhubcohort55.Homebanking.models.CardColor;
-import com.Mindhubcohort55.Homebanking.models.CardType;
 import com.Mindhubcohort55.Homebanking.models.Client;
 import com.Mindhubcohort55.Homebanking.repositories.ClientRepository;
 import com.Mindhubcohort55.Homebanking.services.CardService;
-import com.Mindhubcohort55.Homebanking.services.ClientService;
 import com.Mindhubcohort55.Homebanking.utils.CardNumberGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,13 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import static com.Mindhubcohort55.Homebanking.utils.CardNumberGenerator.getRandomCardNumber;
-import static com.Mindhubcohort55.Homebanking.utils.CardNumberGenerator.getRandomCvvNumber;
 
 @RestController
 @RequestMapping("/api/clients/current/cards")

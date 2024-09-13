@@ -8,17 +8,17 @@ import java.time.LocalDateTime;
 public class TransactionDto {
 
     private long id;
-    private TransactionType transactionType;
+    private TransactionType transactionType; // Cambia a TransactionType para que coincida con la clase Transaction
     private double amount;
     private String description;
-    private LocalDateTime dateTransaction;
+    private LocalDateTime dateTransaction; // Cambia a date para que coincida con la clase Transaction
 
     public TransactionDto(Transaction transaction) {
         this.id = transaction.getId();
-        this.transactionType = transaction.getTransactionType();
+        this.transactionType = transaction.getType(); // Usa getType() en lugar de getTransactionType()
         this.amount = transaction.getAmount();
         this.description = transaction.getDescription();
-        this.dateTransaction = transaction.getDateTransaction();
+        this.dateTransaction = transaction.getDate(); // Usa getDate() en lugar de getDateTransaction()
     }
 
     // Getters y setters
@@ -30,15 +30,31 @@ public class TransactionDto {
         return transactionType;
     }
 
+    public void setTransactionType(TransactionType transactionType) {
+        this.transactionType = transactionType;
+    }
+
     public double getAmount() {
         return amount;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
     }
 
     public String getDescription() {
         return description;
     }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public LocalDateTime getDateTransaction() {
         return dateTransaction;
+    }
+
+    public void setDateTransaction(LocalDateTime dateTransaction) {
+        this.dateTransaction = dateTransaction;
     }
 }

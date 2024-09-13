@@ -1,16 +1,14 @@
 import com.Mindhubcohort55.Homebanking.dtos.LoanApplicationDTO;
 import com.Mindhubcohort55.Homebanking.dtos.LoanDto;
+import com.Mindhubcohort55.Homebanking.dtos.MakeTransactionDto;
 import com.Mindhubcohort55.Homebanking.models.*;
 import com.Mindhubcohort55.Homebanking.services.*;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -66,7 +64,11 @@ public class LoanController {
         }
 
         boolean loanAlreadyRequested = client.getClientLoans().stream()
-                .anyMatch(clientLoan -> clientLoan.getLoan().getId() == loan.getId());
+                .anyMatch(clientLoan -> {
+                    Long clientLoanId = clientLoan.getLoan().getId();
+                    Long loanId = loan.getId();
+                    return clientLoanId != null && clientLoanId.equals(loanId);
+                });
 
         if (loanAlreadyRequested) {
             return new ResponseEntity<>("This kind of loan has already been requested", HttpStatus.FORBIDDEN);
@@ -78,15 +80,14 @@ public class LoanController {
         clientLoanService.saveClientLoan(clientLoan);
 
         if (account != null && loanApplicationDTO.getAmount() > 0) {
-            Transaction creditTransaction = new Transaction(
-                    TransactionType.CREDIT,
+            MakeTransactionDto makeTransactionDto = new MakeTransactionDto(
+                    "LOAN_ACCOUNT", // Define a fixed source account number for loan transactions
+                    account.getNumber(),
                     loanApplicationDTO.getAmount(),
-                    loan.getName() + " Loan approved",
-                    LocalDateTime.now(),
-                    account
+                    loan.getName() + " Loan approved"
             );
 
-            transactionService.makeTransaction(creditTransaction, email);
+            transactionService.makeTransaction(makeTransactionDto, email);
 
             account.setBalance(account.getBalance() + loanApplicationDTO.getAmount());
             accountService.saveAccount(account);

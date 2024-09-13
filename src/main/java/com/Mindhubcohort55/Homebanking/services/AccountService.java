@@ -4,12 +4,8 @@ import com.Mindhubcohort55.Homebanking.dtos.AccountDto;
 import com.Mindhubcohort55.Homebanking.dtos.MakeTransactionDto;
 import com.Mindhubcohort55.Homebanking.models.Account;
 import com.Mindhubcohort55.Homebanking.models.Client;
-import com.Mindhubcohort55.Homebanking.repositories.AccountRepository;
-import com.Mindhubcohort55.Homebanking.repositories.ClientRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AccountService {
@@ -44,7 +40,9 @@ public interface AccountService {
         // Obtiene cuentas asociadas a un cliente.
         List<Account> getAccountsByClient(Client client);
 
-        // Elimina una cuenta de la base de datos.
+    ResponseEntity<?> makeTransaction(MakeTransactionDto makeTransactionDto, String email);
+
+    // Elimina una cuenta de la base de datos.
         void deleteAccount(Long accountId);
 
         // Actualiza el balance de una cuenta.
