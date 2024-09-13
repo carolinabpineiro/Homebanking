@@ -1,56 +1,43 @@
 package com.Mindhubcohort55.Homebanking.models;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
-@Entity
-public class Transaction {
+    @Entity
+    public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // ID único de la transacción, generado automáticamente
+    private Long id;
 
-    @Enumerated(EnumType.STRING)
-    private TransactionType transactionType; // Tipo de transacción (por ejemplo, DEPOSIT, WITHDRAWAL) representado como una cadena de texto
+    private double amount;
+    private String description;
+    private LocalDateTime date;
 
-    private double amount; // Monto de la transacción
+    @Enumerated(EnumType.STRING) //para pasar el enumero a string
+    private TransactionType type;
 
-    private String description; // Descripción de la transacción
+    @ManyToOne(fetch = FetchType.EAGER) //
+    @JoinColumn(name="account_id")
+    private Account account;
 
-    private LocalDateTime dateTransaction; // Fecha y hora en que ocurrió la transacción
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "account_id")
-    private Account account; // Cuenta asociada con la transacción
-
-    // Constructor vacío
     public Transaction() {
     }
 
-    // Constructor completo
-    public Transaction(TransactionType transactionType, double amount, String description, LocalDateTime dateTransaction, Account account) {
-        this.transactionType = transactionType;
+    public Transaction(double amount, String description, LocalDateTime date, TransactionType type) {
         this.amount = amount;
         this.description = description;
-        this.dateTransaction = dateTransaction;
-        this.account = account;
+        this.date = date;
+        this.type = type;
     }
 
-    // Getters y setters
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public TransactionType getTransactionType() {
-        return transactionType;
-    }
-
-    public void setTransactionType(TransactionType transactionType) {
-        this.transactionType = transactionType;
     }
 
     public double getAmount() {
@@ -69,12 +56,20 @@ public class Transaction {
         this.description = description;
     }
 
-    public LocalDateTime getDateTransaction() {
-        return dateTransaction;
+    public LocalDateTime getDate() {
+        return date;
     }
 
-    public void setDateTransaction(LocalDateTime dateTransaction) {
-        this.dateTransaction = dateTransaction;
+    public void setDate(LocalDateTime date) {
+        this.date = date;
+    }
+
+    public TransactionType getType() {
+        return type;
+    }
+
+    public void setType(TransactionType type) {
+        this.type = type;
     }
 
     public Account getAccount() {
@@ -83,16 +78,5 @@ public class Transaction {
 
     public void setAccount(Account account) {
         this.account = account;
-    }
-
-    @Override
-    public String toString() {
-        return "Transaction{" +
-                "id=" + id +
-                ", transactionType=" + transactionType +
-                ", amount=" + amount +
-                ", description='" + description + '\'' +
-                ", dateTransaction=" + dateTransaction +
-                '}';
     }
 }

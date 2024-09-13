@@ -5,29 +5,23 @@ import com.Mindhubcohort55.Homebanking.models.TransactionType;
 
 import java.time.LocalDateTime;
 
-public class TransactionDto {
-
-    private long id;
-    private TransactionType transactionType;
+public class TransactionDTO {
+    private Long id;
     private double amount;
     private String description;
-    private LocalDateTime dateTransaction;
+    private LocalDateTime date;
+    private TransactionType type;
 
-    public TransactionDto(Transaction transaction) {
+    public TransactionDTO(Transaction transaction) {
         this.id = transaction.getId();
-        this.transactionType = transaction.getTransactionType();
         this.amount = transaction.getAmount();
         this.description = transaction.getDescription();
-        this.dateTransaction = transaction.getDateTransaction();
+        this.date = transaction.getDate();
+        this.type = transaction.getType();
     }
 
-    // Getters y setters
     public Long getId() {
         return id;
-    }
-
-    public TransactionType getTransactionType() {
-        return transactionType;
     }
 
     public double getAmount() {
@@ -38,7 +32,11 @@ public class TransactionDto {
         return description;
     }
 
-    public LocalDateTime getDateTransaction() {
-        return dateTransaction;
+    public LocalDateTime getDate() {
+        return date;
+    }
+
+    public TransactionType getType() {
+        return type;
     }
 }

@@ -2,25 +2,23 @@ package com.Mindhubcohort55.Homebanking.dtos;
 
 import com.Mindhubcohort55.Homebanking.models.Loan;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class LoanDto {
-    private long id;
+public class LoanDTO {
+    private Long id;
     private String name;
     private double maxAmount;
-    private List<Integer> payments = new ArrayList<>();
+    private List<Integer> payments;
 
-    public LoanDto() {}
-
-    public LoanDto(Loan loan) {
+    public LoanDTO(Loan loan) {
         this.id = loan.getId();
         this.name = loan.getName();
         this.maxAmount = loan.getMaxAmount();
         this.payments = loan.getPayments();
     }
 
-    public long getId() {
+    // Getters and Setters
+    public Long getId() {
         return id;
     }
 

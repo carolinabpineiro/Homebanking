@@ -1,5 +1,4 @@
 package com.Mindhubcohort55.Homebanking.configurations;
-
 import com.Mindhubcohort55.Homebanking.filters.JwtRequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -17,10 +16,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
-public class WebConfig {
+public class WebConfiguration {
 
     @Autowired
-    private JwtRequestFilter jwtRequestFilter; // Filtro personalizado para manejar la autenticación JWT.
+    private JwtRequestFilter jwtRequestFilter;
 
     @Autowired
     private CorsConfigurationSource corsConfigurationSource; // Fuente de configuración para CORS (Cross-Origin Resource Sharing).
@@ -63,13 +62,23 @@ public class WebConfig {
         return httpSecurity.build();
     }
 
-
+    /**
+     * Configura un codificador de contraseñas utilizando BCrypt para el almacenamiento seguro de contraseñas.
+     *
+     * @return Un codificador de contraseñas BCrypt.
+     */
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-
+    /**
+     * Configura un AuthenticationManager utilizando la configuración de autenticación proporcionada.
+     *
+     * @param authenticationConfiguration Configuración de autenticación.
+     * @return El AuthenticationManager configurado.
+     * @throws Exception Si ocurre algún error durante la configuración.
+     */
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();

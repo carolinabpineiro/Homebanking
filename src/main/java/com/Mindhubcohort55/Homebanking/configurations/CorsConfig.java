@@ -12,16 +12,32 @@ import java.util.List;
 @Configuration
 public class CorsConfig {
 
+    /**
+     * Configuración de CORS (Cross-Origin Resource Sharing) para permitir solicitudes desde dominios específicos.
+     *
+     * @return Una instancia de CorsConfigurationSource que define las reglas de CORS.
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080", "http://localhost:5173"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
-        configuration.setAllowedHeaders(Arrays.asList("*")); // * no es válido en algunos casos, usa una lista específica si puedes
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // Especifica los orígenes permitidos para las solicitudes CORS.
+        // Aquí, se permiten solicitudes desde http://localhost:8080 y http://localhost:5173.
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080", "http://localhost:5173"));
+
+        // Especifica los métodos HTTP permitidos para las solicitudes CORS.
+        // En este caso, se permiten los métodos GET, POST, PUT y DELETE.
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
+
+        // Especifica los encabezados permitidos para las solicitudes CORS.
+        // Se permiten todos los encabezados con "*".
+        configuration.setAllowedHeaders(List.of("*"));
+
+        // Configura la fuente de configuración de CORS con las reglas especificadas.
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource(); //new refiere a un nuevo metodo constructor
         source.registerCorsConfiguration("/**", configuration);
 
+        // Retorna la fuente de configuración de CORS.
         return source;
     }
 }

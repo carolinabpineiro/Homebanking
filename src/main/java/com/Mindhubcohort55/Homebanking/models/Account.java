@@ -1,54 +1,48 @@
 package com.Mindhubcohort55.Homebanking.models;
 
 import jakarta.persistence.*;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-@Entity
+@Entity   //es para que Spring cree la tabla en la base de datos
 public class Account {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Identificador único de la cuenta, generado automáticamente
+    private long id;
 
-    private String number; // Número de cuenta, debe ser único
+    private String number;
+    private LocalDate creationDate;
+    private double balance;
 
-    private LocalDateTime creationDate; // Fecha de creación de la cuenta
-
-    private double balance; // Saldo de la cuenta
-
-    private boolean status; // Estado de la cuenta (por ejemplo, activa o inactiva)
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "client_id")
-    private Client client; // Cliente asociado con esta cuenta
+    private Client client;
 
-    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<Transaction> transactions = new HashSet<>(); // Transacciones asociadas con la cuenta
+    @OneToMany(mappedBy = "account", fetch = FetchType.EAGER)
+    private Set<Transaction> transactions = new HashSet<>();
 
-    // Constructor vacío
     public Account() {
     }
 
-    // Constructor con parámetros para inicializar todos los atributos de la cuenta
-    public Account(String number, LocalDateTime creationDate, double balance, boolean status) {
+    public Account(String number, LocalDate creationDate, double balance) {
         this.number = number;
         this.creationDate = creationDate;
         this.balance = balance;
-        this.status = status;
+
     }
 
-    // Getters y Setters
-    public Long getId() {
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    public long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getNumber() {
@@ -59,11 +53,11 @@ public class Account {
         this.number = number;
     }
 
-    public LocalDateTime getCreationDate() {
+    public LocalDate getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(LocalDateTime creationDate) {
+    public void setCreationDate(LocalDate creationDate) {
         this.creationDate = creationDate;
     }
 
@@ -75,20 +69,9 @@ public class Account {
         this.balance = balance;
     }
 
-    public boolean isStatus() {
-        return status;
-    }
-
-    public void setStatus(boolean status) {
-        this.status = status;
-    }
-
-    public Client getClient() {
-        return client;
-    }
-
-    public void setClient(Client client) {
-        this.client = client;
+    public void addTransaction(Transaction transaction) {
+        this.transactions.add(transaction);
+        transaction.setAccount(this);
     }
 
     public Set<Transaction> getTransactions() {
@@ -106,15 +89,7 @@ public class Account {
                 ", number='" + number + '\'' +
                 ", creationDate=" + creationDate +
                 ", balance=" + balance +
-                ", status=" + status +
-                ", client=" + client +
-                ", transactions=" + transactions +
                 '}';
     }
 
-    // Método para agregar una transacción a la cuenta
-    public void addTransaction(Transaction transaction) {
-        transactions.add(transaction);
-        transaction.setAccount(this);
-    }
 }

@@ -2,49 +2,34 @@ package com.Mindhubcohort55.Homebanking.models;
 
 import jakarta.persistence.*;
 
+
 @Entity
 public class ClientLoan {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // ID único del préstamo del cliente, generado automáticamente
+    private Long id;
 
-    private double amount; // Monto del préstamo otorgado al cliente
-
-    private int payments; // Número de pagos del préstamo
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "client_id")
-    private Client client; // Cliente asociado con el préstamo
+    private double amount;
+    private int payments;
+//fetch como se cargara la relacion cuando se recupere la entidad en la db
+    @ManyToOne(fetch = FetchType.EAGER)  //muchas instancias de esta entidad pueden estar relac con una unica instancia de CLIENT
+    @JoinColumn(name = "client_id") //personalizo la columna de la db q se usara para la clave externa q establece la relacion entre 2 tablas
+    private Client client;//relacion con la entidad, con su objeto asociado (client)
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "loan_id")
-    private Loan loan; // Préstamo asociado con el cliente
+    private Loan loan;
 
-    // Constructor vacío
-    public ClientLoan() {}
+    public ClientLoan() {
+    }
 
-    // Constructor parcial
     public ClientLoan(double amount, int payments) {
         this.amount = amount;
         this.payments = payments;
     }
 
-    // Constructor completo
-    public ClientLoan(double amount, int payments, Client client, Loan loan) {
-        this.amount = amount;
-        this.payments = payments;
-        this.client = client;
-        this.loan = loan;
-    }
-
-    // Getters y setters
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public double getAmount() {
@@ -59,7 +44,7 @@ public class ClientLoan {
         return payments;
     }
 
-    public void setPayments(int payments) {
+    public void setPayments(Integer payments) {
         this.payments = payments;
     }
 
@@ -77,14 +62,5 @@ public class ClientLoan {
 
     public void setLoan(Loan loan) {
         this.loan = loan;
-    }
-
-    @Override
-    public String toString() {
-        return "ClientLoan{" +
-                "id=" + id +
-                ", amount=" + amount +
-                ", payments=" + payments +
-                '}';
     }
 }

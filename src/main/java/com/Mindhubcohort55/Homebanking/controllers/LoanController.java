@@ -1,99 +1,114 @@
-import com.Mindhubcohort55.Homebanking.dtos.LoanApplicationDTO;
-import com.Mindhubcohort55.Homebanking.dtos.LoanDto;
+package com.Mindhubcohort55.Homebanking.controllers;
+
+import com.Mindhubcohort55.Homebanking.dtos.LoanAplicationDTO;
 import com.Mindhubcohort55.Homebanking.models.*;
-import com.Mindhubcohort55.Homebanking.services.*;
-import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
+import com.Mindhubcohort55.Homebanking.repositories.*;
+import com.Mindhubcohort55.Homebanking.services.LoanServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.security.core.Authentication;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/loans")
 public class LoanController {
 
     @Autowired
-    private ClientService clientService;
-    @Autowired
-    private AccountService accountService;
-    @Autowired
-    private TransactionService transactionService;
-    @Autowired
-    private LoanService loanService;
-    @Autowired
-    private ClientLoanService clientLoanService;
+    private ClientRepository clientRepository;
 
-    @GetMapping("/loans")
-    public List<LoanDto> getLoans() {
-        return loanService.getLoansDTO();
+    @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
+    private LoanRepository loanRepository;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
+    private ClientLoanRepository clientLoanRepository;  // Repositorio para guardar ClientLoan
+
+    @Autowired
+    private LoanServices loanServices;
+
+    @GetMapping("/")
+    public ResponseEntity<?> getLoans() {
+        return ResponseEntity.ok(loanServices.getAllLoanDTO());
     }
 
     @Transactional
-    @PostMapping("/loans")
-    public ResponseEntity<Object> createLoan(@RequestBody LoanApplicationDTO loanApplicationDTO, Authentication authentication) {
-        String email = authentication.getName();
-        Client client = clientService.getClientByEmail(email);
-        Loan loan = loanService.findLoanById(loanApplicationDTO.getId());
-        Account account = accountService.getAccountByNumber(loanApplicationDTO.getDestinationAccountNumber());
+    @PostMapping("/")
+    public ResponseEntity<?> createLoan(@RequestBody LoanAplicationDTO loanAplicationDTO, Authentication authentication) {
 
-        if (loanApplicationDTO.getAmount() <= 0 || loanApplicationDTO.getPayment() <= 0) {
-            return new ResponseEntity<>("Missing data", HttpStatus.FORBIDDEN);
+        Client client = clientRepository.findByEmail(authentication.getName());
+
+        // Verificar que el campo de cuenta no esté vacío
+        if (loanAplicationDTO.destinationAccount().isBlank()) {
+            return new ResponseEntity<>("The transaction account field must not be empty", HttpStatus.FORBIDDEN);
         }
 
-        if (loan == null) {
-            return new ResponseEntity<>("This kind of loan doesn't exist", HttpStatus.FORBIDDEN);
-        }
-
-        if (loanApplicationDTO.getAmount() > loan.getMaxAmount()) {
-            return new ResponseEntity<>("The amount requested is greater than the amount allowed", HttpStatus.FORBIDDEN);
-        }
-
-        if (!loan.getPayments().contains(loanApplicationDTO.getPayment())) {
-            return new ResponseEntity<>("The number of payments is not allowed in this type of loan", HttpStatus.FORBIDDEN);
-        }
-
+        // Verificar que la cuenta de destino exista
+        Account account = accountRepository.findByNumber(loanAplicationDTO.destinationAccount());
         if (account == null) {
-            return new ResponseEntity<>("The destination account doesn't exist", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>("The specified account does not exist.", HttpStatus.FORBIDDEN);
         }
 
-        if (!client.getAccounts().contains(account)) {
-            return new ResponseEntity<>("The destination account does not belong to the client", HttpStatus.FORBIDDEN);
+        // Verificar que la cuenta de destino pertenezca al cliente autenticado
+        if (!client.getAccounts().stream().map(Account::getNumber).toList().contains(loanAplicationDTO.destinationAccount())) {
+            return new ResponseEntity<>("The specified account does not belong to the authenticated client.", HttpStatus.FORBIDDEN);
         }
 
-        boolean loanAlreadyRequested = client.getClientLoans().stream()
-                .anyMatch(clientLoan -> clientLoan.getLoan().getId() == loan.getId());
-
-        if (loanAlreadyRequested) {
-            return new ResponseEntity<>("This kind of loan has already been requested", HttpStatus.FORBIDDEN);
+        // Verificar que el tipo de préstamo exista
+        Loan loan = loanRepository.findById(loanAplicationDTO.id()).orElse(null);
+        if (loan == null) {
+            return new ResponseEntity<>("Loan type not found.", HttpStatus.FORBIDDEN);
         }
 
-        ClientLoan clientLoan = new ClientLoan(loanApplicationDTO.getAmount() * 1.20, loanApplicationDTO.getPayment());
+        // Verificar que el monto no exceda el máximo permitido
+        if (loanAplicationDTO.amount() <= 0 || loanAplicationDTO.amount() > loan.getMaxAmount()) {
+            return new ResponseEntity<>("The loan amount must be greater than 0 and less than or equal to the maximum amount allowed.", HttpStatus.FORBIDDEN);
+        }
+
+        // Verificar que las cuotas estén dentro de las permitidas para ese préstamo
+        if (!loan.getPayments().contains(loanAplicationDTO.payments())) {
+            return new ResponseEntity<>("The number of payments is not valid for the selected loan.", HttpStatus.FORBIDDEN);
+        }
+
+        // Determinar la tasa de interés según las cuotas
+        double interestRate;
+        if (loanAplicationDTO.payments() == 12) {
+            interestRate = 0.20;
+        } else if (loanAplicationDTO.payments() > 12) {
+            interestRate = 0.25;
+        } else {
+            interestRate = 0.15;
+        }
+
+        // Agregar el 20% o la tasa variable al monto del préstamo
+        double finalAmount = loanAplicationDTO.amount() * (1 + interestRate);
+
+        // Crear un ClientLoan con el monto final y las cuotas
+        ClientLoan clientLoan = new ClientLoan(finalAmount, loanAplicationDTO.payments());
         clientLoan.setClient(client);
         clientLoan.setLoan(loan);
-        clientLoanService.saveClientLoan(clientLoan);
+        client.getClientLoans().add(clientLoan);
 
-        if (account != null && loanApplicationDTO.getAmount() > 0) {
-            Transaction creditTransaction = new Transaction(
-                    TransactionType.CREDIT,
-                    loanApplicationDTO.getAmount(),
-                    loan.getName() + " Loan approved",
-                    LocalDateTime.now(),
-                    account
-            );
+        // Crear una transacción para el crédito aprobado
+        Transaction creditTransaction = new Transaction(finalAmount,
+                "Loan approved: " + loan.getName(),
+                LocalDateTime.now(),
+                TransactionType.CREDIT);
+        account.addTransaction(creditTransaction);
 
-            transactionService.makeTransaction(creditTransaction, email);
+        // Actualizar el saldo de la cuenta
+        account.setBalance(account.getBalance() + loanAplicationDTO.amount());
 
-            account.setBalance(account.getBalance() + loanApplicationDTO.getAmount());
-            accountService.saveAccount(account);
+        clientRepository.save(client);
+        accountRepository.save(account);
 
-            return new ResponseEntity<>("The loan has been successfully requested", HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<>("Invalid transaction data", HttpStatus.FORBIDDEN);
-        }
+        return new ResponseEntity<>("Loan approved and credited to the account.", HttpStatus.CREATED);
     }
 }

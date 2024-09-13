@@ -1,89 +1,82 @@
 package com.Mindhubcohort55.Homebanking.models;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
+
 @Entity
 public class Card {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Enumerated(EnumType.STRING)
-    private CardType cardType;
-
-    @Enumerated(EnumType.STRING)
-    private CardColor cardColor;
-
-    private String cardNumber;
-
-    private String cvv;
-
-    private LocalDate fromDate;
-
-    private LocalDate thruDate;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id")
-    private Client client;  // Relación con cliente
+    private long id;
 
     private String cardHolder;
+    private CardType type;
+    private CardColor color;
+    private String number;
+    private int cvv;
+    private LocalDate fromDate;
+    private LocalDate thruDate;
 
-    // Constructor vacío necesario para JPA
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "client_id")
+    private Client client;
+
     public Card() {
     }
 
-    // Constructor parametrizado con cliente
-    public Card(CardType cardType, CardColor cardColor, String cardNumber, String cvv, LocalDate fromDate, LocalDate thruDate, String cardHolder, Client client) {
-        this.cardType = cardType;
-        this.cardColor = cardColor;
-        this.cardNumber = cardNumber;
-        this.cvv = cvv;
+    public Card(CardType type, CardColor color, LocalDate fromDate, LocalDate thruDate) {
+        this.type = type;
+        this.color = color;
         this.fromDate = fromDate;
         this.thruDate = thruDate;
-        this.cardHolder = cardHolder;
-        this.client = client;
     }
 
-    // Getters y Setters
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
-    public CardType getCardType() {
-        return cardType;
+    public String getCardHolder() {
+        return cardHolder;
     }
 
-    public void setCardType(CardType cardType) {
-        this.cardType = cardType;
+    public void setCardHolder(String cardHolder) {
+        this.cardHolder = cardHolder;
     }
 
-    public CardColor getCardColor() {
-        return cardColor;
+    public CardType getType() {
+        return type;
     }
 
-    public void setCardColor(CardColor cardColor) {
-        this.cardColor = cardColor;
+    public void setType(CardType type) {
+        this.type = type;
     }
 
-    public String getCardNumber() {
-        return cardNumber;
+    public CardColor getColor() {
+        return color;
     }
 
-    public void setCardNumber(String cardNumber) {
-        this.cardNumber = cardNumber;
+    public void setColor(CardColor color) {
+        this.color = color;
     }
 
-    public String getCvv() {
+    public String getNumber() {
+        return number;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
+    }
+
+    public int getCvv() {
         return cvv;
     }
 
-    public void setCvv(String cvv) {
+    public void setCvv(int cvv) {
         this.cvv = cvv;
     }
 
@@ -103,34 +96,11 @@ public class Card {
         this.thruDate = thruDate;
     }
 
-    public String getCardHolder() {
-        return cardHolder;
-    }
-
-    public void setCardHolder(String cardHolder) {
-        this.cardHolder = cardHolder;
-    }
-
     public Client getClient() {
         return client;
     }
 
     public void setClient(Client client) {
         this.client = client;
-    }
-
-    @Override
-    public String toString() {
-        return "Card{" +
-                "id=" + id +
-                ", cardType=" + cardType +
-                ", cardColor=" + cardColor +
-                ", cardNumber='" + cardNumber + '\'' +
-                ", cvv='" + cvv + '\'' +
-                ", fromDate=" + fromDate +
-                ", thruDate=" + thruDate +
-                ", client=" + client +
-                ", cardHolder='" + cardHolder + '\'' +
-                '}';
     }
 }
