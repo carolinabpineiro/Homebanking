@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
 
 @SpringBootApplication
 public class HomebankingApplication {
@@ -28,46 +29,70 @@ public class HomebankingApplication {
 	private PasswordEncoder passwordEncoder;
 	// Método que se ejecuta al iniciar la aplicación. esta en el contexto de spring, porq no teiene anotaciones
 	@Bean
-	public CommandLineRunner initData(ClientRepository clientRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, LoanRepository loanRepository, ClientLoanRepository clientLoanRepository,CardRepository cardRepository, ClientLoanService clientLoanService) { //ini, t data es el nombre del metodo 	//inyeccion de dependencias. corredor de comandos en linea
+	public CommandLineRunner initData(ClientRepository clientRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, LoanRepository loanRepository, ClientLoanRepository clientLoanRepository, CardRepository cardRepository, ClientLoanService clientLoanService) {
 		return (args) -> {
 
-			//crear prestamos
-			Loan mortgage = new Loan("Mortgage", 500.000, Arrays.asList(12, 24, 36, 48, 60, 72));
-			Loan personal = new Loan("Personal", 100.000,  Arrays.asList(6,12,24));
-			Loan automotive = new Loan("Automotive", 300.000, Arrays.asList(6,12,24,36));
+			// Crear préstamos
+			Loan mortgage = new Loan("Mortgage", 500000.00, Arrays.asList(12, 24, 36, 48, 60, 72));
+			Loan personal = new Loan("Personal", 100000.00, Arrays.asList(6, 12, 24));
+			Loan automotive = new Loan("Automotive", 300000.00, Arrays.asList(6, 12, 24, 36));
 			loanRepository.save(mortgage);
 			loanRepository.save(personal);
 			loanRepository.save(automotive);
 
-
-			// Creación del usuario Lola
+			// Crear el usuario Lola
 			Client lola = new Client("Lola", "Pineiro", "lolapineiro@gmail.com", passwordEncoder.encode("0403"));
 			Account accountLola1 = new Account("VIN003", LocalDateTime.now(), 100000.00, true);
 			Account accountLola2 = new Account("VIN004", LocalDateTime.now(), 200000.00, true);
 			lola.addAccount(accountLola1);
 			lola.addAccount(accountLola2);
 
-
 			clientRepository.save(lola);
 			accountRepository.save(accountLola1);
 			accountRepository.save(accountLola2);
 
-			// Creación del usuario Melba
+			// Asignar préstamo a Lola (puede ser cualquier préstamo disponible)
+			ClientLoan clientLoanLola = new ClientLoan(50000.00, 12, lola, personal); // Ejemplo con préstamo Personal
+			clientLoanRepository.save(clientLoanLola);
+
+			// Crear el usuario Melba
 			Client melba = new Client("Melba", "Morel", "melba@mindhub.com", passwordEncoder.encode("1423"));
 			Account accountMelba1 = new Account("VIN001", LocalDateTime.now(), 5000.00, true);
 			Account accountMelba2 = new Account("VIN002", LocalDateTime.now(), 7500.00, true);
 			melba.addAccount(accountMelba1);
 			melba.addAccount(accountMelba2);
 
-
-
 			clientRepository.save(melba);
 			accountRepository.save(accountMelba1);
 			accountRepository.save(accountMelba2);
+
+			// Asignar préstamo a Melba
+			ClientLoan clientLoanMelba = new ClientLoan(400000.00, 60, melba, mortgage); // Préstamo Mortgage de 400000 en 60 cuotas
+			clientLoanRepository.save(clientLoanMelba);
+
+			// Crear transacciones iniciales
 			Transaction transactionMelba1 = new Transaction(TransactionType.CREDIT, 100000.00, "Initial deposit", LocalDateTime.now(), accountLola1);
 			transactionRepository.save(transactionMelba1);
 			Transaction transactionMelba2 = new Transaction(TransactionType.CREDIT, 100000.00, "Initial deposit", LocalDateTime.now(), accountMelba1);
 			transactionRepository.save(transactionMelba2);
+
+			// Crear tarjetas para Lola
+			Card cardLolaDebitGold = new Card(CardType.DEBIT, CardColor.GOLD, CardNumberGenerator.getRandomCardNumber(), CardNumberGenerator.getRandomCvvNumber(), LocalDate.now(), LocalDate.now().plusYears(5), "Lola Debit Gold", lola);
+			Card cardLolaCreditPlatinum = new Card(CardType.CREDIT, CardColor.SILVER, CardNumberGenerator.getRandomCardNumber(), CardNumberGenerator.getRandomCvvNumber(), LocalDate.now(), LocalDate.now().plusYears(5), "Lola Credit Platinum", lola);
+
+			lola.addCard(cardLolaDebitGold);
+			lola.addCard(cardLolaCreditPlatinum);
+			cardRepository.save(cardLolaDebitGold);
+			cardRepository.save(cardLolaCreditPlatinum);
+
+// Crear tarjetas para Melba
+			Card cardMelbaDebitTitanium = new Card(CardType.DEBIT, CardColor.TITANIUM, CardNumberGenerator.getRandomCardNumber(), CardNumberGenerator.getRandomCvvNumber(), LocalDate.now(), LocalDate.now().plusYears(5), "Melba Debit Titanium", melba);
+			Card cardMelbaCreditGold = new Card(CardType.CREDIT, CardColor.GOLD, CardNumberGenerator.getRandomCardNumber(), CardNumberGenerator.getRandomCvvNumber(), LocalDate.now(), LocalDate.now().plusYears(5), "Melba Credit Gold", melba);
+
+			melba.addCard(cardMelbaDebitTitanium);
+			melba.addCard(cardMelbaCreditGold);
+			cardRepository.save(cardMelbaDebitTitanium);
+			cardRepository.save(cardMelbaCreditGold);
 
 
 //			Client admin = new Client("Thomas", "Maldonado", "totomaldopi@gmail.com", passwordEncoder.encode("adminpassword"));

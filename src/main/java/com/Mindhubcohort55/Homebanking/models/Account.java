@@ -34,12 +34,17 @@ public class Account {
     public Account() {
     }
 
-    // Constructor con parámetros para inicializar todos los atributos de la cuenta
+    // Constructor con 4 parámetros (incluyendo estado)
     public Account(String number, LocalDateTime creationDate, double balance, boolean status) {
         this.number = number;
         this.creationDate = creationDate;
         this.balance = balance;
         this.status = status;
+    }
+
+    // Constructor con 3 parámetros, asumiendo estado activo (true)
+    public Account(String number, LocalDateTime creationDate, double balance) {
+        this(number, creationDate, balance, true); // Se asume que la cuenta está activa por defecto
     }
 
     // Getters y Setters

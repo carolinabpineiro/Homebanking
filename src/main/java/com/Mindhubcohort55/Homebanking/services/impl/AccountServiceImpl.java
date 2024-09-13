@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,8 +53,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Account getAccountById(long id) {
-        return accountRepository.findById(id).orElse(null);
+    public Optional<Account> getAccountById(long id) {
+        return accountRepository.findById(id);
     }
 
     @Override
@@ -69,6 +70,11 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Account getAccountByNumber(String number) {
         return accountRepository.findByNumber(number);
+    }
+
+    @Override
+    public boolean existsByAccountNumber(String accountNumber) {
+        return accountRepository.existsByNumber(accountNumber); // Implementa en el repositorio
     }
 
     @Override
@@ -95,7 +101,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public ResponseEntity<?> makeTransaction(MakeTransactionDto makeTransactionDto, String email) {
-        // Implement the transaction logic here
+        // Implementar lógica de transacción
         return null;
     }
 
@@ -114,6 +120,6 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void updateAccount(Account account) {
-        accountRepository.save(account); // Save the updated account
+        accountRepository.save(account);
     }
 }
