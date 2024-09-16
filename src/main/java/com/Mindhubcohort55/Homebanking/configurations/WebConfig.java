@@ -40,11 +40,11 @@ public class WebConfig {
                         authorize
                                 .requestMatchers("/api/auth/login", "/api/auth/signup", "/h2-console/**").permitAll()
                                 .requestMatchers(
-                                        "/api/clients/acccounts/current",
+                                        "/api/clients/accounts/current",
                                         "/api/auth/current",
-                                        "api/clients/current/cards",
-                                        "api/loans/",
-                                        "api/transactions"
+                                        "/api/clients/current/cards",
+                                        "/api/loans/",
+                                        "/api/transactions"
                                 ).hasRole("CLIENT")
                                 .requestMatchers("/api/clients/**").hasRole("ADMIN")
                 )

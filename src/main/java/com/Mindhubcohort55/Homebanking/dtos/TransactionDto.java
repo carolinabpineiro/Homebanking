@@ -8,10 +8,10 @@ import java.time.LocalDateTime;
 public class TransactionDto {
 
     private long id;
-    private TransactionType transactionType; // Cambia a TransactionType para que coincida con la clase Transaction
+    private TransactionType transactionType;
     private double amount;
     private String description;
-    private LocalDateTime dateTransaction; // Cambia a date para que coincida con la clase Transaction
+    private LocalDateTime dateTransaction;
 
     public TransactionDto(Transaction transaction) {
         this.id = transaction.getId();

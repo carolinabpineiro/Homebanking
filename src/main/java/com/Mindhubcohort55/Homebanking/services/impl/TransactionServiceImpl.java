@@ -1,7 +1,6 @@
 package com.Mindhubcohort55.Homebanking.services.impl;
 
 import com.Mindhubcohort55.Homebanking.dtos.MakeTransactionDto;
-import com.Mindhubcohort55.Homebanking.dtos.TransactionDto;
 import com.Mindhubcohort55.Homebanking.models.Account;
 import com.Mindhubcohort55.Homebanking.models.Client;
 import com.Mindhubcohort55.Homebanking.models.Transaction;
@@ -18,37 +17,60 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-
+import java.util.List;
+import java.util.Set;
 @Service
 public class TransactionServiceImpl implements TransactionService {
 
-    private final TransactionRepository transactionRepository;
-    private final AccountService accountService;
-    private final ClientService clientService;
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     @Autowired
-    public TransactionServiceImpl(TransactionRepository transactionRepository,
-                                  AccountService accountService,
-                                  ClientService clientService) {
-        this.transactionRepository = transactionRepository;
-        this.accountService = accountService;
-        this.clientService = clientService;
-    }
+    private AccountService accountService;
+
+    @Autowired
+    private ClientService clientService;
 
     @Transactional
     @Override
     public ResponseEntity<String> makeTransaction(MakeTransactionDto makeTransactionDto, Authentication authentication) {
+        // Agrega logs para depurar
+        System.out.println("Authentication Name: " + authentication.getName());
+        System.out.println("Transaction DTO: " + makeTransactionDto);
+
+        // Validación de la transacción
         ResponseEntity<String> validationResponse = validateTransaction(makeTransactionDto, authentication);
         if (validationResponse.getStatusCode() != HttpStatus.OK) {
             return validationResponse;
         }
 
-        // Realiza la transacción después de la validación
+        // Realiza la transacción
         Client client = clientService.getClientByEmail(authentication.getName());
+        System.out.println("Authenticated Client: " + client);
+
         Account sourceAccount = accountService.getAccountByNumber(makeTransactionDto.sourceAccount());
         Account destinationAccount = accountService.getAccountByNumber(makeTransactionDto.destinationAccount());
 
-        // Crear las transacciones
+        System.out.println("Source Account: " + sourceAccount);
+        System.out.println("Destination Account: " + destinationAccount);
+
+        if (sourceAccount == null || destinationAccount == null) {
+            return new ResponseEntity<>("One or both accounts do not exist", HttpStatus.FORBIDDEN);
+        }
+
+        if (!sourceAccount.getClient().equals(client)) {
+            return new ResponseEntity<>("Source account does not belong to the authenticated client", HttpStatus.FORBIDDEN);
+        }
+
+        if (sourceAccount.getBalance() < makeTransactionDto.amount()) {
+            return new ResponseEntity<>("Insufficient funds in the source account", HttpStatus.FORBIDDEN);
+        }
+
+        if (sourceAccount.equals(destinationAccount)) {
+            return new ResponseEntity<>("Source and destination accounts must be different", HttpStatus.FORBIDDEN);
+        }
+
+        // Crear y guardar las transacciones
         Transaction sourceTransaction = new Transaction(
                 TransactionType.DEBIT,
                 makeTransactionDto.amount(),
@@ -71,7 +93,7 @@ public class TransactionServiceImpl implements TransactionService {
         sourceAccount.setBalance(sourceAccount.getBalance() - makeTransactionDto.amount());
         destinationAccount.setBalance(destinationAccount.getBalance() + makeTransactionDto.amount());
 
-        // Guardar las transacciones y las cuentas
+        // Guardar transacciones y cuentas
         transactionRepository.save(sourceTransaction);
         transactionRepository.save(destinationTransaction);
         accountService.updateAccount(sourceAccount);
@@ -82,6 +104,9 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public ResponseEntity<String> validateTransaction(MakeTransactionDto makeTransactionDto, Authentication authentication) {
+        // Agrega logs para depurar
+        System.out.println("Validating transaction with DTO: " + makeTransactionDto);
+
         // Validaciones
         if (makeTransactionDto.sourceAccount().isBlank() || makeTransactionDto.destinationAccount().isBlank()) {
             return new ResponseEntity<>("Source or destination account is missing", HttpStatus.FORBIDDEN);
@@ -97,10 +122,14 @@ public class TransactionServiceImpl implements TransactionService {
 
         // Obtener cliente autenticado
         Client client = clientService.getClientByEmail(authentication.getName());
+        System.out.println("Client for validation: " + client);
 
         // Verificar cuentas
         Account sourceAccount = accountService.getAccountByNumber(makeTransactionDto.sourceAccount());
         Account destinationAccount = accountService.getAccountByNumber(makeTransactionDto.destinationAccount());
+
+        System.out.println("Source Account for validation: " + sourceAccount);
+        System.out.println("Destination Account for validation: " + destinationAccount);
 
         if (sourceAccount == null || destinationAccount == null) {
             return new ResponseEntity<>("One or both accounts do not exist", HttpStatus.FORBIDDEN);
@@ -119,5 +148,23 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         return new ResponseEntity<>("Validation successful", HttpStatus.OK);
+    }
+
+    @Override
+    public Set<Transaction> findByAccountId(Long accountId) {
+        // Obtén la cuenta por ID y luego encuentra las transacciones asociadas
+        Account account = accountService.getAccountById(accountId)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+        return transactionRepository.findByAccount(account);
+    }
+
+    @Override
+    public List<Transaction> findByTransferDateBetweenAndAccountNumber(LocalDateTime dateInit, LocalDateTime dateEnd, String accountNumber) {
+        return transactionRepository.findByDateBetweenAndAccountNumber(dateInit, dateEnd, accountNumber);
+    }
+
+    @Override
+    public void saveTransaction(Transaction transaction) {
+        transactionRepository.save(transaction);
     }
 }
