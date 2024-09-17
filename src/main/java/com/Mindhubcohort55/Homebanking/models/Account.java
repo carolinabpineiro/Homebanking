@@ -13,22 +13,22 @@ public class Account {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Identificador único de la cuenta, generado automáticamente
+    private Long id;
 
-    private String number; // Número de cuenta, debe ser único
+    private String number;
 
-    private LocalDateTime creationDate; // Fecha de creación de la cuenta
+    private LocalDateTime creationDate;
 
-    private double balance; // Saldo de la cuenta
+    private double balance;
 
-    private boolean status; // Estado de la cuenta (por ejemplo, activa o inactiva)
+    private boolean status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
-    private Client client; // Cliente asociado con esta cuenta
+    private Client client;
 
     @OneToMany(mappedBy = "account", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<Transaction> transactions = new HashSet<>(); // Transacciones asociadas con la cuenta
+    private Set<Transaction> transactions = new HashSet<>();
 
     // Constructor vacío
     public Account() {
@@ -44,7 +44,7 @@ public class Account {
 
     // Constructor con 3 parámetros, asumiendo estado activo (true)
     public Account(String number, LocalDateTime creationDate, double balance) {
-        this(number, creationDate, balance, true); // Se asume que la cuenta está activa por defecto
+        this(number, creationDate, balance, true);
     }
 
     // Getters y Setters
@@ -112,8 +112,7 @@ public class Account {
                 ", creationDate=" + creationDate +
                 ", balance=" + balance +
                 ", status=" + status +
-                ", client=" + client +
-                ", transactions=" + transactions +
+                // No incluir 'client' y 'transactions' para evitar recursión
                 '}';
     }
 

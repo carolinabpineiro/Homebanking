@@ -34,7 +34,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     @Override
     public ResponseEntity<String> makeTransaction(MakeTransactionDto makeTransactionDto, Authentication authentication) {
-        // Agrega logs para depurar
+        // Logs para depurar
         System.out.println("Authentication Name: " + authentication.getName());
         System.out.println("Transaction DTO: " + makeTransactionDto);
 
@@ -54,23 +54,32 @@ public class TransactionServiceImpl implements TransactionService {
         System.out.println("Source Account: " + sourceAccount);
         System.out.println("Destination Account: " + destinationAccount);
 
+        // Validación de cuentas
         if (sourceAccount == null || destinationAccount == null) {
             return new ResponseEntity<>("One or both accounts do not exist", HttpStatus.FORBIDDEN);
         }
 
-        if (!sourceAccount.getClient().equals(client)) {
+        // Validación de propiedad de la cuenta de origen
+        if (!client.ownsAccount(sourceAccount)) {
             return new ResponseEntity<>("Source account does not belong to the authenticated client", HttpStatus.FORBIDDEN);
         }
 
+        // Verificación del estado activo de las cuentas
+        if (!sourceAccount.isStatus() || !destinationAccount.isStatus()) {
+            return new ResponseEntity<>("One or both accounts are inactive", HttpStatus.FORBIDDEN);
+        }
+
+        // Validación de saldo
         if (sourceAccount.getBalance() < makeTransactionDto.amount()) {
             return new ResponseEntity<>("Insufficient funds in the source account", HttpStatus.FORBIDDEN);
         }
 
+        // Validación de cuentas diferentes
         if (sourceAccount.equals(destinationAccount)) {
             return new ResponseEntity<>("Source and destination accounts must be different", HttpStatus.FORBIDDEN);
         }
 
-        // Crear y guardar las transacciones
+        // Crear y guardar transacciones
         Transaction sourceTransaction = new Transaction(
                 TransactionType.DEBIT,
                 makeTransactionDto.amount(),

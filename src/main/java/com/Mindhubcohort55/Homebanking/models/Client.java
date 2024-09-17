@@ -20,13 +20,13 @@ public class Client {
     private String email;
     private String password;
 
-    @OneToMany(mappedBy = "client", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
     private Set<Account> accounts = new HashSet<>();
 
-    @OneToMany(mappedBy = "client", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
     private Set<Card> cards = new HashSet<>();
 
-    @OneToMany(mappedBy = "client", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
     private Set<ClientLoan> clientLoans = new HashSet<>();
 
     // Constructor vacío
@@ -106,6 +106,11 @@ public class Client {
         this.clientLoans = clientLoans;
     }
 
+    // Método para verificar si una cuenta pertenece al cliente
+    public boolean ownsAccount(Account account) {
+        return this.accounts.contains(account);
+    }
+
     @Override
     public String toString() {
         return "Client{" +
@@ -113,10 +118,7 @@ public class Client {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", accounts=" + accounts +
-                ", cards=" + cards +
-                ", clientLoans=" + clientLoans +
+                // No incluir 'accounts' para evitar recursión
                 '}';
     }
 
@@ -128,7 +130,7 @@ public class Client {
 
     public void addCard(Card card) {
         this.cards.add(card);
-        card.setClient(this);  // Asegurar relación bidireccional
+        card.setClient(this);
     }
 
     public void addClientLoan(ClientLoan clientLoan) {
