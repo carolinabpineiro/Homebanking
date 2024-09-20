@@ -16,10 +16,11 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/clients/accounts")
+@RequestMapping("/api/accounts")
 public class AccountController {
 
     @Autowired
@@ -29,7 +30,7 @@ public class AccountController {
     private ClientService clientService;
 
     // Crear una nueva cuenta para el cliente autenticado
-    @PostMapping ("/current")
+    @PostMapping("/current")
     public ResponseEntity<?> createAccount(Authentication authentication) {
         String email = authentication.getName();
         Client client = clientService.getClientByEmail(email);
@@ -48,16 +49,16 @@ public class AccountController {
         String accountNumber = generateUniqueAccountNumber();
 
         // Crear una nueva cuenta con saldo 0 y cuenta activa
-        Account newAccount = new Account(accountNumber, LocalDateTime.now(), 0.0, true); // Ajuste del constructor
+        Account newAccount = new Account(accountNumber, LocalDateTime.now(), 0.0, true);
         client.addAccount(newAccount);
-        accountService.saveAccount(newAccount); // Guardar la nueva cuenta
-        clientService.saveClient(client); // Guardar el cliente con la nueva cuenta
+        accountService.saveAccount(newAccount);
+        clientService.saveClient(client);
 
         return new ResponseEntity<>(new AccountDto(newAccount), HttpStatus.CREATED);
     }
 
     // Obtener todas las cuentas del cliente autenticado
-    @GetMapping ("/current")
+    @GetMapping("/current")
     public ResponseEntity<List<AccountDto>> getAccounts(Authentication authentication) {
         String email = authentication.getName();
         Client client = clientService.getClientByEmail(email);
@@ -74,11 +75,25 @@ public class AccountController {
     // Obtener una cuenta específica por su ID
     @GetMapping("/{id}")
     public ResponseEntity<AccountDto> getAccount(@PathVariable Long id) {
-        Account account = accountService.getAccountById(id).orElse(null);
-        if (account == null) {
+        Optional<Account> account = accountService.getAccountById(id);
+        if (!account.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(new AccountDto(account), HttpStatus.OK);
+        return new ResponseEntity<>(new AccountDto(account.get()), HttpStatus.OK);
+    }
+
+    // Eliminar una cuenta por ID
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteAccount(@PathVariable Long id, Authentication authentication) {
+        Client client = clientService.getClientByEmail(authentication.getName());
+        Optional<Account> accountOptional = accountService.getAccountById(id);
+
+        if (!accountOptional.isPresent() || !accountOptional.get().getClient().equals(client)) {
+            return new ResponseEntity<>("Account not found or not owned by the client", HttpStatus.FORBIDDEN);
+        }
+
+        accountService.deleteAccount(id);
+        return new ResponseEntity<>("Account deleted successfully", HttpStatus.OK);
     }
 
     // Método privado para generar un número de cuenta único

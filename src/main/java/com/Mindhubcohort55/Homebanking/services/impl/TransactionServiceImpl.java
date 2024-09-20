@@ -1,13 +1,14 @@
 package com.Mindhubcohort55.Homebanking.services.impl;
 
 import com.Mindhubcohort55.Homebanking.dtos.MakeTransactionDto;
+import com.Mindhubcohort55.Homebanking.dtos.TransactionDto;
 import com.Mindhubcohort55.Homebanking.models.Account;
 import com.Mindhubcohort55.Homebanking.models.Client;
 import com.Mindhubcohort55.Homebanking.models.Transaction;
 import com.Mindhubcohort55.Homebanking.models.TransactionType;
+import com.Mindhubcohort55.Homebanking.repositories.AccountRepository;
+import com.Mindhubcohort55.Homebanking.repositories.ClientRepository;
 import com.Mindhubcohort55.Homebanking.repositories.TransactionRepository;
-import com.Mindhubcohort55.Homebanking.services.AccountService;
-import com.Mindhubcohort55.Homebanking.services.ClientService;
 import com.Mindhubcohort55.Homebanking.services.TransactionService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,62 +20,40 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 @Service
 public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
+    private ClientRepository clientRepository;
+
+    @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
     private TransactionRepository transactionRepository;
-
-    @Autowired
-    private AccountService accountService;
-
-    @Autowired
-    private ClientService clientService;
 
     @Transactional
     @Override
-    public ResponseEntity<String> makeTransaction(MakeTransactionDto makeTransactionDto, Authentication authentication) {
-        // Logs para depurar
-        System.out.println("Authentication Name: " + authentication.getName());
-        System.out.println("Transaction DTO: " + makeTransactionDto);
+    public ResponseEntity<String> makeTransaction(MakeTransactionDto makeTransactionDTO, Authentication authentication) {
+        // Implementa la lógica para realizar una transacción basada en el DTO
+        Client client = clientRepository.findByEmail(authentication.getName());
+        Account sourceAccount = accountRepository.findByNumber(makeTransactionDTO.sourceAccount());
+        Account destinationAccount = accountRepository.findByNumber(makeTransactionDTO.destinationAccount());
 
-        // Validación de la transacción
-        ResponseEntity<String> validationResponse = validateTransaction(makeTransactionDto, authentication);
-        if (validationResponse.getStatusCode() != HttpStatus.OK) {
-            return validationResponse;
+        if (client == null || sourceAccount == null || destinationAccount == null) {
+            return new ResponseEntity<>("Invalid account or client", HttpStatus.BAD_REQUEST);
         }
 
-        // Realiza la transacción
-        Client client = clientService.getClientByEmail(authentication.getName());
-        System.out.println("Authenticated Client: " + client);
-
-        Account sourceAccount = accountService.getAccountByNumber(makeTransactionDto.sourceAccount());
-        Account destinationAccount = accountService.getAccountByNumber(makeTransactionDto.destinationAccount());
-
-        System.out.println("Source Account: " + sourceAccount);
-        System.out.println("Destination Account: " + destinationAccount);
-
-        // Validación de cuentas
-        if (sourceAccount == null || destinationAccount == null) {
-            return new ResponseEntity<>("One or both accounts do not exist", HttpStatus.FORBIDDEN);
+        if (!client.getAccounts().contains(sourceAccount)) {
+            return new ResponseEntity<>("Client does not own the source account", HttpStatus.FORBIDDEN);
         }
 
-        // Validación de propiedad de la cuenta de origen
-        if (!client.ownsAccount(sourceAccount)) {
-            return new ResponseEntity<>("Source account does not belong to the authenticated client", HttpStatus.FORBIDDEN);
+        if (sourceAccount.getBalance() < makeTransactionDTO.amount()) {
+            return new ResponseEntity<>("Insufficient funds", HttpStatus.FORBIDDEN);
         }
 
-        // Verificación del estado activo de las cuentas
-        if (!sourceAccount.isStatus() || !destinationAccount.isStatus()) {
-            return new ResponseEntity<>("One or both accounts are inactive", HttpStatus.FORBIDDEN);
-        }
-
-        // Validación de saldo
-        if (sourceAccount.getBalance() < makeTransactionDto.amount()) {
-            return new ResponseEntity<>("Insufficient funds in the source account", HttpStatus.FORBIDDEN);
-        }
-
-        // Validación de cuentas diferentes
         if (sourceAccount.equals(destinationAccount)) {
             return new ResponseEntity<>("Source and destination accounts must be different", HttpStatus.FORBIDDEN);
         }
@@ -82,8 +61,8 @@ public class TransactionServiceImpl implements TransactionService {
         // Crear y guardar transacciones
         Transaction sourceTransaction = new Transaction(
                 TransactionType.DEBIT,
-                makeTransactionDto.amount(),
-                makeTransactionDto.description(),
+                makeTransactionDTO.amount(),
+                makeTransactionDTO.description(),
                 LocalDateTime.now(),
                 sourceAccount
         );
@@ -91,54 +70,45 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction destinationTransaction = new Transaction(
                 TransactionType.CREDIT,
-                makeTransactionDto.amount(),
-                makeTransactionDto.description(),
+                makeTransactionDTO.amount(),
+                makeTransactionDTO.description(),
                 LocalDateTime.now(),
                 destinationAccount
         );
         destinationAccount.addTransaction(destinationTransaction);
 
         // Actualizar balances
-        sourceAccount.setBalance(sourceAccount.getBalance() - makeTransactionDto.amount());
-        destinationAccount.setBalance(destinationAccount.getBalance() + makeTransactionDto.amount());
+        sourceAccount.setBalance(sourceAccount.getBalance() - makeTransactionDTO.amount());
+        destinationAccount.setBalance(destinationAccount.getBalance() + makeTransactionDTO.amount());
 
         // Guardar transacciones y cuentas
         transactionRepository.save(sourceTransaction);
         transactionRepository.save(destinationTransaction);
-        accountService.updateAccount(sourceAccount);
-        accountService.updateAccount(destinationAccount);
+        accountRepository.save(sourceAccount);
+        accountRepository.save(destinationAccount);
 
         return new ResponseEntity<>("Transaction completed successfully", HttpStatus.CREATED);
     }
 
     @Override
-    public ResponseEntity<String> validateTransaction(MakeTransactionDto makeTransactionDto, Authentication authentication) {
-        // Agrega logs para depurar
-        System.out.println("Validating transaction with DTO: " + makeTransactionDto);
-
-        // Validaciones
-        if (makeTransactionDto.sourceAccount().isBlank() || makeTransactionDto.destinationAccount().isBlank()) {
+    public ResponseEntity<String> validateTransaction(MakeTransactionDto makeTransactionDTO, Authentication authentication) {
+        // Validaciones básicas
+        if (makeTransactionDTO.sourceAccount().isBlank() || makeTransactionDTO.destinationAccount().isBlank()) {
             return new ResponseEntity<>("Source or destination account is missing", HttpStatus.FORBIDDEN);
         }
 
-        if (makeTransactionDto.amount() <= 0) {
+        if (makeTransactionDTO.amount() <= 0) {
             return new ResponseEntity<>("Amount must be greater than zero", HttpStatus.FORBIDDEN);
         }
 
-        if (makeTransactionDto.description().isBlank()) {
+        if (makeTransactionDTO.description().isBlank()) {
             return new ResponseEntity<>("Description is missing", HttpStatus.FORBIDDEN);
         }
 
-        // Obtener cliente autenticado
-        Client client = clientService.getClientByEmail(authentication.getName());
-        System.out.println("Client for validation: " + client);
-
-        // Verificar cuentas
-        Account sourceAccount = accountService.getAccountByNumber(makeTransactionDto.sourceAccount());
-        Account destinationAccount = accountService.getAccountByNumber(makeTransactionDto.destinationAccount());
-
-        System.out.println("Source Account for validation: " + sourceAccount);
-        System.out.println("Destination Account for validation: " + destinationAccount);
+        // Validación adicional
+        Client client = clientRepository.findByEmail(authentication.getName());
+        Account sourceAccount = accountRepository.findByNumber(makeTransactionDTO.sourceAccount());
+        Account destinationAccount = accountRepository.findByNumber(makeTransactionDTO.destinationAccount());
 
         if (sourceAccount == null || destinationAccount == null) {
             return new ResponseEntity<>("One or both accounts do not exist", HttpStatus.FORBIDDEN);
@@ -148,7 +118,7 @@ public class TransactionServiceImpl implements TransactionService {
             return new ResponseEntity<>("Source account does not belong to the authenticated client", HttpStatus.FORBIDDEN);
         }
 
-        if (sourceAccount.getBalance() < makeTransactionDto.amount()) {
+        if (sourceAccount.getBalance() < makeTransactionDTO.amount()) {
             return new ResponseEntity<>("Insufficient funds in the source account", HttpStatus.FORBIDDEN);
         }
 
@@ -161,8 +131,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Set<Transaction> findByAccountId(Long accountId) {
-        // Obtén la cuenta por ID y luego encuentra las transacciones asociadas
-        Account account = accountService.getAccountById(accountId)
+        Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
         return transactionRepository.findByAccount(account);
     }
@@ -176,4 +145,73 @@ public class TransactionServiceImpl implements TransactionService {
     public void saveTransaction(Transaction transaction) {
         transactionRepository.save(transaction);
     }
+
+
+
+    @Transactional
+    @Override
+    public ResponseEntity<String> transferFunds(String email, String sourceAccountNumber, String destinationAccountNumber, double amount) {
+        try {
+            Client client = clientRepository.findByEmail(email);
+            Account sourceAccount = accountRepository.findByNumber(sourceAccountNumber);
+            Account destinationAccount = accountRepository.findByNumber(destinationAccountNumber);
+
+            if (client == null || sourceAccount == null || destinationAccount == null) {
+                return new ResponseEntity<>("Invalid account or client", HttpStatus.BAD_REQUEST);
+            }
+
+            if (!client.getAccounts().contains(sourceAccount)) {
+                return new ResponseEntity<>("Client does not own the source account", HttpStatus.FORBIDDEN);
+            }
+
+            // Additional logic for transferring funds
+            if (sourceAccount.getBalance() < amount) {
+                return new ResponseEntity<>("Insufficient funds in source account", HttpStatus.FORBIDDEN);
+            }
+
+            // Create and save transactions
+            Transaction sourceTransaction = new Transaction(
+                    TransactionType.DEBIT,
+                    amount,
+                    "Transfer to " + destinationAccountNumber,
+                    LocalDateTime.now(),
+                    sourceAccount
+            );
+            Transaction destinationTransaction = new Transaction(
+                    TransactionType.CREDIT,
+                    amount,
+                    "Transfer from " + sourceAccountNumber,
+                    LocalDateTime.now(),
+                    destinationAccount
+            );
+
+            sourceAccount.setBalance(sourceAccount.getBalance() - amount);
+            destinationAccount.setBalance(destinationAccount.getBalance() + amount);
+
+            transactionRepository.save(sourceTransaction);
+            transactionRepository.save(destinationTransaction);
+            accountRepository.save(sourceAccount);
+            accountRepository.save(destinationAccount);
+
+            return new ResponseEntity<>("Transfer successful", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
+    public List<TransactionDto> getTransactionsByAccountId(Long accountId) {
+        // Obtener la cuenta usando el ID
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+
+        // Obtener las transacciones asociadas a la cuenta
+        Set<Transaction> transactions = transactionRepository.findByAccount(account);
+
+        // Convertir las transacciones a TransactionDto
+        return transactions.stream()
+                .map(TransactionDto::new) // Utiliza el constructor que acepta Transaction
+                .collect(Collectors.toList());
+    }
+
 }

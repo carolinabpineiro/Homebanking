@@ -30,8 +30,7 @@ public class Client {
     private Set<ClientLoan> clientLoans = new HashSet<>();
 
     // Constructor vacío
-    public Client() {
-    }
+    public Client() {}
 
     // Constructor con parámetros
     public Client(String firstName, String lastName, String email, String password) {
@@ -106,23 +105,6 @@ public class Client {
         this.clientLoans = clientLoans;
     }
 
-    // Método para verificar si una cuenta pertenece al cliente
-    public boolean ownsAccount(Account account) {
-        return this.accounts.contains(account);
-    }
-
-    @Override
-    public String toString() {
-        return "Client{" +
-                "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", email='" + email + '\'' +
-                // No incluir 'accounts' para evitar recursión
-                '}';
-    }
-
-    // Métodos para relaciones bidireccionales
     public void addAccount(Account account) {
         this.accounts.add(account);
         account.setClient(this);
@@ -136,5 +118,9 @@ public class Client {
     public void addClientLoan(ClientLoan clientLoan) {
         this.clientLoans.add(clientLoan);
         clientLoan.setClient(this);
+    }
+
+    public boolean ownsAccount(Account account) {
+        return accounts.contains(account);
     }
 }

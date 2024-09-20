@@ -26,7 +26,7 @@ public class Card {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
-    private Client client;  // Relación con cliente
+    private Client client;
 
     private String cardHolder;
 
@@ -34,7 +34,7 @@ public class Card {
     public Card() {
     }
 
-    // Constructor parametrizado con cliente
+    // Constructor parametrizado
     public Card(CardType cardType, CardColor cardColor, String cardNumber, String cvv, LocalDate fromDate, LocalDate thruDate, String cardHolder, Client client) {
         this.cardType = cardType;
         this.cardColor = cardColor;

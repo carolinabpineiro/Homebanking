@@ -3,6 +3,7 @@ package com.Mindhubcohort55.Homebanking.services;
 import com.Mindhubcohort55.Homebanking.dtos.MakeTransactionDto;
 import com.Mindhubcohort55.Homebanking.dtos.TransactionDto;
 import com.Mindhubcohort55.Homebanking.models.Transaction;
+import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 
@@ -20,4 +21,9 @@ public interface TransactionService {
     List<Transaction> findByTransferDateBetweenAndAccountNumber(LocalDateTime dateInit, LocalDateTime dateEnd, String accountNumber);
 
     void saveTransaction(Transaction transaction);
+
+    @Transactional
+    ResponseEntity<String> transferFunds(String email, String sourceAccountNumber, String destinationAccountNumber, double amount);
+
+    List<TransactionDto> getTransactionsByAccountId(Long accountId); // Agregar esta línea
 }

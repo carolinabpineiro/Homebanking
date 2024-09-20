@@ -5,6 +5,7 @@ import com.Mindhubcohort55.Homebanking.dtos.MakeTransactionDto;
 import com.Mindhubcohort55.Homebanking.models.Account;
 import com.Mindhubcohort55.Homebanking.models.Client;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +24,15 @@ public interface AccountService {
     // Guarda una cuenta en la base de datos.
     void saveAccount(Account account);
 
+    // Obtiene el DTO de una cuenta por su ID.
+    ResponseEntity<AccountDto> getAccountDTO(Long id);
+
+    // Crea una cuenta para el cliente autenticado.
+    ResponseEntity<String> createAccount(Authentication authentication);
+
+    // Elimina una cuenta según el ID proporcionado y el cliente autenticado.
+    ResponseEntity<String> deleteAccount(Long id, Authentication authentication);
+
     // Obtiene todas las cuentas.
     List<Account> getAccounts();
 
@@ -32,7 +42,7 @@ public interface AccountService {
     // Verifica si existe una cuenta con un número específico.
     boolean existsByAccountNumber(String accountNumber);
 
-    // Obtiene cuentas por estado (activo/inactivo).
+    // Obtiene cuentas según su estado (activo/inactivo).
     List<Account> getAccountsByStatus(boolean status);
 
     // Obtiene todas las cuentas en formato DTO.
@@ -41,7 +51,7 @@ public interface AccountService {
     // Obtiene un DTO de cuenta por su ID.
     AccountDto getAccountDTOById(Long id);
 
-    // Obtiene cuentas asociadas a un cliente.
+    // Obtiene las cuentas asociadas a un cliente.
     List<Account> getAccountsByClient(Client client);
 
     // Realiza una transacción.

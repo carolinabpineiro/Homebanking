@@ -6,11 +6,17 @@ import com.Mindhubcohort55.Homebanking.models.Client;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Set;
 
+@Repository
 public interface CardRepository extends JpaRepository<Card, Long> {
-    Set<Card> findByClient(Client client);
+
     boolean existsByCardNumber(String cardNumber);
+
     boolean existsByCvv(String cvv);
+
     long countByClientAndCardType(Client client, CardType cardType);
+
+    List<Card> findByClient(Client client);
 }
