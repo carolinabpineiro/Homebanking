@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 @Service
 public class LoanServiceImpl implements LoanService {
 
@@ -35,7 +36,9 @@ public class LoanServiceImpl implements LoanService {
 
     @Override
     public List<LoanDto> getLoansDTO() {
-        return loanRepository.findAll().stream().map(LoanDto::new).collect(Collectors.toList());
+        return loanRepository.findAll().stream()
+                .map(LoanDto::new)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -75,7 +78,7 @@ public class LoanServiceImpl implements LoanService {
             return new ResponseEntity<>("Account does not belong to the client", HttpStatus.FORBIDDEN);
         }
 
-        // Nueva verificación: ¿el cliente ya ha solicitado este préstamo?
+        // Verificar si el cliente ya ha solicitado este préstamo
         if (clientHasAppliedForLoan(client, loan)) {
             return new ResponseEntity<>("You have already applied for this loan", HttpStatus.BAD_REQUEST);
         }
@@ -85,26 +88,34 @@ public class LoanServiceImpl implements LoanService {
             return new ResponseEntity<>(validationError, HttpStatus.BAD_REQUEST);
         }
 
-        double finalAmount = loanApplicationDto.getAmount() * (1 + determineInterestRate(loanApplicationDto.getPayments()));
-        ClientLoan clientLoan = new ClientLoan(finalAmount, loanApplicationDto.getPayments());
+        // Monto solicitado por el cliente
+        double requestedAmount = loanApplicationDto.getAmount();
+
+        // Calcular el monto total a devolver (incluyendo intereses)
+        double interestRate = determineInterestRate(loanApplicationDto.getPayments());
+        double totalAmountToRepay = requestedAmount * (1 + interestRate); // Total a devolver
+
+        ClientLoan clientLoan = new ClientLoan(totalAmountToRepay, loanApplicationDto.getPayments());
         clientLoan.setClient(client);
         clientLoan.setLoan(loan);
 
         Transaction transaction = new Transaction(
                 TransactionType.CREDIT,
-                finalAmount,
+                requestedAmount, // Acreditar solo el monto solicitado
                 "Loan approved: " + loan.getName(),
                 LocalDateTime.now(),
                 account
         );
 
+        // Actualiza el balance de la cuenta
+        account.setBalance(account.getBalance() + requestedAmount);
         account.addTransaction(transaction);
         client.getClientLoans().add(clientLoan);
 
         clientLoanRepository.save(clientLoan);
         transactionRepository.save(transaction);
         clientRepository.save(client);
-        accountRepository.save(account);
+        accountRepository.save(account); // Guardar la cuenta con el nuevo balance
 
         return new ResponseEntity<>("Loan approved and credited to the account", HttpStatus.CREATED);
     }

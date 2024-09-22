@@ -70,7 +70,7 @@ public class HomebankingApplication {
 			ClientLoan clientLoanMelba = new ClientLoan(400000.00, 60, melba, mortgage); // Préstamo Mortgage de 400000 en 60 cuotas
 			clientLoanRepository.save(clientLoanMelba);
 
-			// Crear transacciones iniciales
+
 			Transaction transactionMelba1 = new Transaction(TransactionType.CREDIT, 100000.00, "Initial deposit", LocalDateTime.now(), accountLola1);
 			transactionRepository.save(transactionMelba1);
 			Transaction transactionMelba2 = new Transaction(TransactionType.CREDIT, 100000.00, "Initial deposit", LocalDateTime.now(), accountMelba1);

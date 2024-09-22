@@ -33,11 +33,7 @@ public class LoanController {
         return ResponseEntity.ok(loanService.getLoansDTO());
     }
 
-//    @GetMapping("/loansApplied")
-//    public ResponseEntity<?> loansApplied(Authentication authentication) {
-//        // Implementar la lógica según sea necesario
-//        return ResponseEntity.ok("Lo que sea que desees retornar aquí");
-//    }
+
 
     @PostMapping("/apply")
     public ResponseEntity<?> applyForLoan(Authentication authentication, @RequestBody LoanApplicationDto loanDTO) {
