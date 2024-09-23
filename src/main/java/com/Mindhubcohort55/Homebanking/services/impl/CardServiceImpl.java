@@ -60,6 +60,11 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
+    public boolean existsByClientAndCardTypeAndCardColor(Client client, CardType cardType, CardColor cardColor) {
+        return cardRepository.existsByClientAndCardTypeAndCardColor(client, cardType, cardColor);
+    }
+
+    @Override
     public List<CardDto> getAllCardsDTO() {
         return cardRepository.findAll().stream()
                 .map(CardDto::new)
@@ -103,11 +108,11 @@ public class CardServiceImpl implements CardService {
     public String validateDetailsCard(Client client, CardDto cardDto) {
         if (cardDto.getCardType() == CardType.DEBIT) {
             if (getAllCardsDebits(client).size() >= 3) {
-                return "You can't have more than 3 debit cards";
+                return "You can't have more than 3 debit cards.";
             }
         } else {
             if (getAllCardsCredits(client).size() >= 3) {
-                return "You can't have more than 3 credit cards";
+                return "You can't have more than 3 credit cards.";
             }
         }
         return null;
@@ -117,11 +122,11 @@ public class CardServiceImpl implements CardService {
     public String validateColor(Client client, CardColor color, CardType type) {
         if (type == CardType.DEBIT) {
             if (getAllCardsDebits(client).stream().anyMatch(card -> card.getCardColor() == color)) {
-                return "You already have a debit card with this color";
+                return "You already have a debit card with this color.";
             }
         } else {
             if (getAllCardsCredits(client).stream().anyMatch(card -> card.getCardColor() == color)) {
-                return "You already have a credit card with this color";
+                return "You already have a credit card with this color.";
             }
         }
 

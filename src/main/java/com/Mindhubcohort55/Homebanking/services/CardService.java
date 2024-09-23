@@ -25,6 +25,8 @@ public interface CardService {
 
     long countByClientAndCardType(Client client, CardType cardType);
 
+    boolean existsByClientAndCardTypeAndCardColor(Client client, CardType cardType, CardColor cardColor);
+
     List<CardDto> getAllCardsDTO();
 
     ResponseEntity<?> createCard(Authentication authentication, CardDto cardDto); // Cambiado a CardDto

@@ -26,19 +26,24 @@ public class CardController {
     @Autowired
     private ClientRepository clientRepository;
 
-    @PostMapping ("/cards")
-    public ResponseEntity<Void> createCard(@RequestBody CreateCardDto createCardDto, Authentication authentication) {
+    @PostMapping("/cards")
+    public ResponseEntity<String> createCard(@RequestBody CreateCardDto createCardDto, Authentication authentication) {
         // Obtener el cliente autenticado
         Client client = clientRepository.findByEmail(authentication.getName());
 
         if (client == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found.");
         }
 
         // Verificar que el cliente no tenga ya 3 tarjetas del mismo tipo
         long cardCount = cardService.countByClientAndCardType(client, createCardDto.type());
         if (cardCount >= 3) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can't have more than 3 cards of the same type.");
+        }
+
+        // Verificar que el cliente no tenga ya una tarjeta del mismo tipo y color
+        if (cardService.existsByClientAndCardTypeAndCardColor(client, createCardDto.type(), createCardDto.color())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You already have a card with this type and color.");
         }
 
         // Crear una nueva tarjeta
@@ -55,15 +60,15 @@ public class CardController {
 
         // Verificar el número de tarjetas y CVV antes de guardar
         if (cardService.existsByCardNumber(card.getCardNumber()) || cardService.existsByCvv(card.getCvv())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Card number or CVV already exists.");
         }
 
         // Guardar la tarjeta
         cardService.saveCard(card);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body("Card created successfully.");
     }
 
-    @GetMapping ("/cards")
+    @GetMapping("/cards")
     public ResponseEntity<Set<CardDto>> getCards(Authentication authentication) {
         // Obtener el cliente autenticado
         Client client = clientRepository.findByEmail(authentication.getName());
