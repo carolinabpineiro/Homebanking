@@ -41,6 +41,8 @@ public class LoanController {
         return loanService.applyForLoan(email, loanDTO);
     }
 
+
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();

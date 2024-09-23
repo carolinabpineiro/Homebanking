@@ -18,4 +18,6 @@ public interface LoanService {
 
     @Transactional
     ResponseEntity<?> applyForLoan(String email, LoanApplicationDto loanApplicationDto);
+
+
 }

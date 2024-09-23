@@ -135,4 +135,6 @@ public class LoanServiceImpl implements LoanService {
     private boolean clientHasAppliedForLoan(Client client, Loan loan) {
         return client.getClientLoans().stream().anyMatch(cl -> cl.getLoan().equals(loan));
     }
+
+
 }
