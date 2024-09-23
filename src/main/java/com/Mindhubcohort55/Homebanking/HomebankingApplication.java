@@ -71,10 +71,10 @@ public class HomebankingApplication {
 			clientLoanRepository.save(clientLoanMelba);
 
 
-			Transaction transactionMelba1 = new Transaction(TransactionType.CREDIT, 100000.00, "Initial deposit", LocalDateTime.now(), accountLola1);
-			transactionRepository.save(transactionMelba1);
-			Transaction transactionMelba2 = new Transaction(TransactionType.CREDIT, 100000.00, "Initial deposit", LocalDateTime.now(), accountMelba1);
-			transactionRepository.save(transactionMelba2);
+//			Transaction transactionMelba1 = new Transaction(TransactionType.CREDIT, 100000.00, "Initial deposit", LocalDateTime.now(), accountLola1);
+//			transactionRepository.save(transactionMelba1);
+//			Transaction transactionMelba2 = new Transaction(TransactionType.CREDIT, 100000.00, "Initial deposit", LocalDateTime.now(), accountMelba1);
+//			transactionRepository.save(transactionMelba2);
 
 			// Crear tarjetas para Lola
 			Card cardLolaDebitGold = new Card(CardType.DEBIT, CardColor.GOLD, CardNumberGenerator.getRandomCardNumber(), CardNumberGenerator.getRandomCvvNumber(), LocalDate.now(), LocalDate.now().plusYears(5), "Lola Debit Gold", lola);

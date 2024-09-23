@@ -92,6 +92,13 @@ public class AccountController {
             return new ResponseEntity<>("Account not found or not owned by the client", HttpStatus.FORBIDDEN);
         }
 
+        Account account = accountOptional.get();
+
+        // Verificar si el saldo es 0 antes de eliminar
+        if (account.getBalance() != 0) {
+            return new ResponseEntity<>("Cannot delete account with non-zero balance", HttpStatus.FORBIDDEN);
+        }
+
         accountService.deleteAccount(id);
         return new ResponseEntity<>("Account deleted successfully", HttpStatus.OK);
     }
