@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.util.Set;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/clients/current")
 public class CardController {
 
