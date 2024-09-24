@@ -94,14 +94,15 @@ public class AuthController {
                 return new ResponseEntity<>("The Email entered is already registered", HttpStatus.FORBIDDEN);
             }
 
-            if (registerDto.password().isBlank()) {
-                return new ResponseEntity<>("The Password field must not be empty", HttpStatus.BAD_REQUEST);
-            }
+            String password = registerDto.password();
 
-            // Validación de longitud de la contraseña
-            if (registerDto.password().length() < 4) {
+            // Verificamos si el campo de contraseña está vacío o su longitud es menor a 4
+            if (password == null || password.isBlank()) {
+                return new ResponseEntity<>("The Password field must not be empty", HttpStatus.BAD_REQUEST);
+            } else if (password.length() < 4) {
                 return new ResponseEntity<>("The Password must be at least 4 characters long", HttpStatus.BAD_REQUEST);
             }
+
 
 
 
