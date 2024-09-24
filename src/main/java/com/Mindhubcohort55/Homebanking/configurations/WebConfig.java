@@ -35,11 +35,31 @@ public class WebConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
+
                 .authorizeHttpRequests(authorize ->
                         authorize
                                 .requestMatchers("/api/auth/login", "/api/auth/signup", "/h2-console/**").permitAll()
-                                .requestMatchers("/api/clients/current/**").hasRole("CLIENT")
-                                .requestMatchers("/api/clients/**", "/api/accounts/**").hasRole("ADMIN")
+                                .requestMatchers(
+                                        "/api/accounts/current",
+                                        "/api/accounts/{id}",
+                                        "/api/auth/current",
+                                        "/api/clients/current/cards",
+                                        "/api/loans/",
+                                        "/api/loans/apply",
+                                        "/api/loans/loansAvailable",
+                                        "/api/loans/loansApplied",
+                                        "/api/transactions",
+                                        "/api/transactions/{id}"
+
+                                ).hasRole("CLIENT")
+                                .requestMatchers("/api/clients/",
+                                        "/api/clients/**",
+                                        "/api/accounts/",
+                                        "/api/accounts/**",
+                                        "/api/cards/",
+                                        "/api/cards/**",
+                                        "/api/loans/",
+                                        "/api/loans/**").hasRole("ADMIN")
                 )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

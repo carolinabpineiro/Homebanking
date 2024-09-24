@@ -11,7 +11,7 @@ public class ClientLoanServiceImpl implements ClientLoanService {
 
     // Repositorio para gestionar operaciones sobre préstamos de clientes
     @Autowired
-    ClientLoanRepository clientLoanRepository;
+    private ClientLoanRepository clientLoanRepository;
 
     /**
      * Guarda un préstamo de cliente en la base de datos.

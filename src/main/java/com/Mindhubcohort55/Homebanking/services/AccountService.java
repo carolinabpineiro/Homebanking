@@ -1,107 +1,68 @@
 package com.Mindhubcohort55.Homebanking.services;
 
 import com.Mindhubcohort55.Homebanking.dtos.AccountDto;
+import com.Mindhubcohort55.Homebanking.dtos.MakeTransactionDto;
 import com.Mindhubcohort55.Homebanking.models.Account;
 import com.Mindhubcohort55.Homebanking.models.Client;
-import com.Mindhubcohort55.Homebanking.repositories.AccountRepository;
-import com.Mindhubcohort55.Homebanking.repositories.ClientRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface AccountService {
 
-        /**
-         * Crea una cuenta por defecto para un cliente dado.
-         *
-         * @param clientId ID del cliente para quien se crea la cuenta.
-         * @return La cuenta creada.
-         */
-        Account createDefaultAccount(Long clientId);
+    // Crea una cuenta predeterminada para un nuevo cliente.
+    Account createDefaultAccountForNewClient();
 
-        /**
-         * Obtiene una cuenta por su ID.
-         *
-         * @param id ID de la cuenta.
-         * @return La cuenta encontrada, o null si no existe.
-         */
-        Account getAccountById(long id);
+    // Crea una cuenta predeterminada para un cliente existente.
+    Account createDefaultAccount(Long clientId);
 
-        /**
-         * Guarda una cuenta en la base de datos.
-         *
-         * @param account La cuenta a guardar.
-         */
-        void saveAcc(Account account);
+    // Obtiene una cuenta por su ID.
+    Optional<Account> getAccountById(long id);
 
-        /**
-         * Obtiene todas las cuentas en la base de datos.
-         *
-         * @return Una lista de todas las cuentas.
-         */
-        List<Account> getAccounts();
+    // Guarda una cuenta en la base de datos.
+    void saveAccount(Account account);
 
-        /**
-         * Obtiene una cuenta por su número.
-         *
-         * @param number Número de la cuenta.
-         * @return La cuenta encontrada, o null si no existe.
-         */
-        Account getAccByNumber(String number);
+    // Obtiene el DTO de una cuenta por su ID.
+    ResponseEntity<AccountDto> getAccountDTO(Long id);
 
-        /**
-         * Obtiene todas las cuentas que tienen un estado específico.
-         *
-         * @param status Estado de la cuenta (true para activa, false para inactiva).
-         * @return Una lista de cuentas con el estado dado.
-         */
-        List<Account> getAccByStatus(boolean status);
+    // Crea una cuenta para el cliente autenticado.
+    ResponseEntity<String> createAccount(Authentication authentication);
 
-        /**
-         * Obtiene todas las cuentas en formato DTO.
-         *
-         * @return Una lista de DTOs de cuentas.
-         */
-        List<AccountDto> getAccountsDTO();
+    // Elimina una cuenta según el ID proporcionado y el cliente autenticado.
+    ResponseEntity<String> deleteAccount(Long id, Authentication authentication);
 
-        /**
-         * Guarda una cuenta en la base de datos.
-         *
-         * @param account La cuenta a guardar.
-         */
-        void saveAccount(Account account);
+    // Obtiene todas las cuentas.
+    List<Account> getAccounts();
 
-        /**
-         * Obtiene una cuenta en formato DTO por su ID.
-         *
-         * @param id ID de la cuenta.
-         * @return El DTO de la cuenta encontrada, o null si no existe.
-         */
-        AccountDto getAccountDTOById(Long id);
+    // Obtiene una cuenta por su número.
+    Account getAccountByNumber(String number);
 
-        /**
-         * Obtiene una cuenta por su número.
-         *
-         * @param number Número de la cuenta.
-         * @return La cuenta encontrada, o null si no existe.
-         */
-        Account getAccountByNumber(String number);
+    // Verifica si existe una cuenta con un número específico.
+    boolean existsByAccountNumber(String accountNumber);
 
-        /**
-         * Obtiene todas las cuentas de un cliente dado.
-         *
-         * @param client Cliente cuyo cuentas se desean obtener.
-         * @return Una lista de cuentas asociadas al cliente.
-         */
-        List<Account> getAccByOwner(Client client);
+    // Obtiene cuentas según su estado (activo/inactivo).
+    List<Account> getAccountsByStatus(boolean status);
 
-        /**
-         * Obtiene todas las cuentas de un cliente dado, usando un nombre de cliente.
-         *
-         * @param client Cliente cuyo cuentas se desean obtener.
-         * @return Una lista de cuentas asociadas al cliente.
-         */
-        List<Account> getAccByClient(Client client);
+    // Obtiene todas las cuentas en formato DTO.
+    List<AccountDto> getAccountsDTO();
+
+    // Obtiene un DTO de cuenta por su ID.
+    AccountDto getAccountDTOById(Long id);
+
+    // Obtiene las cuentas asociadas a un cliente.
+    List<Account> getAccountsByClient(Client client);
+
+    // Realiza una transacción.
+    ResponseEntity<?> makeTransaction(MakeTransactionDto makeTransactionDto, String email);
+
+    // Elimina una cuenta de la base de datos.
+    void deleteAccount(Long accountId);
+
+    // Actualiza el balance de una cuenta.
+    void updateAccountBalance(Long accountId, double newBalance);
+
+    // Actualiza una cuenta en la base de datos.
+    void updateAccount(Account account);
 }
-

@@ -6,31 +6,28 @@ import org.springframework.stereotype.Component;
 
 import java.util.Random;
 
-@Component
 public class AccountNumberGenerator {
 
-    @Autowired
-    public static AccountRepository accountRepository; // Inyección de dependencias para el repositorio de cuentas.
-
-    // Constructor para la inyección de dependencias.
-    public AccountNumberGenerator(AccountRepository accountRepository) {
-        this.accountRepository = accountRepository;
+    // Genera un número de cuenta único.
+    public static String makeAccountNumber(AccountRepository accountRepository) {
+        String accountNumber;
+        do {
+            accountNumber = generateAccountNumber();
+        } while (!isAccountNumberUnique(accountNumber, accountRepository));
+        return accountNumber;
     }
 
-    // Método para generar un número de cuenta único.
-    public static String makeAccountNumber() {
-
-        String leftZero;
-
-        // Generar un número de cuenta único hasta que se encuentre uno que no exista en el repositorio.
-        do {
-            // Genera un número aleatorio de 8 dígitos.
-            leftZero = String.format("%08d", (int) (Math.random() * (100000000 - 1) + 1));
-            // Alternativa comentada usando Random (esto es opcional).
-            // leftZero = String.format("%08d", random.nextInt(100000000));
-        } while (accountRepository.existsByNumber("VIN" + leftZero)); // Verifica que el número generado no exista ya.
-
-        // Devuelve el número de cuenta en formato "VINXXXXXXXX", donde "XXXXXXXX" es el número generado.
+    // Genera un número aleatorio de cuenta con formato "VINXXXXXXXX".
+    private static String generateAccountNumber() {
+        // Genera un número aleatorio de 8 dígitos.
+        String leftZero = String.format("%08d", (int) (Math.random() * (100000000 - 1) + 1));
+        // Retorna el número de cuenta con el prefijo "VIN".
         return "VIN" + leftZero;
+    }
+
+    // Verifica si el número de cuenta es único.
+    private static boolean isAccountNumberUnique(String accountNumber, AccountRepository accountRepository) {
+        // Verifica que el número generado no exista ya en el repositorio.
+        return !accountRepository.existsByNumber(accountNumber);
     }
 }

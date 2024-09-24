@@ -2,39 +2,50 @@ package com.Mindhubcohort55.Homebanking.services;
 
 import com.Mindhubcohort55.Homebanking.dtos.CardDto;
 import com.Mindhubcohort55.Homebanking.models.Card;
+import com.Mindhubcohort55.Homebanking.models.CardColor;
+import com.Mindhubcohort55.Homebanking.models.CardType;
+import com.Mindhubcohort55.Homebanking.models.Client;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 
+import java.util.List;
 import java.util.Set;
 
 public interface CardService {
 
-    /**
-     * Obtiene todas las tarjetas en formato DTO.
-     *
-     * @return Un conjunto de DTOs de tarjetas.
-     */
-    Set<CardDto> getCardsDTO();
+    Set<CardDto> getCardsByClient(Client client);
 
-    /**
-     * Guarda una tarjeta en la base de datos.
-     *
-     * @param card La tarjeta a guardar.
-     */
     void saveCard(Card card);
 
-    /**
-     * Obtiene una tarjeta por su ID.
-     *
-     * @param id ID de la tarjeta.
-     * @return La tarjeta encontrada, o null si no existe.
-     */
     Card getCardById(Long id);
 
-    // Método opcional para desactivar tarjeta
-    // /**
-    //  * Desactiva una tarjeta en la base de datos por su ID.
-    //  *
-    //  * @param id ID de la tarjeta a desactivar.
-    //  */
-    // void deleteCard(long id);
-}
+    boolean existsByCardNumber(String cardNumber);
 
+    boolean existsByCvv(String cvv);
+
+    long countByClientAndCardType(Client client, CardType cardType);
+
+    boolean existsByClientAndCardTypeAndCardColor(Client client, CardType cardType, CardColor cardColor);
+
+    List<CardDto> getAllCardsDTO();
+
+    ResponseEntity<?> createCard(Authentication authentication, CardDto cardDto); // Cambiado a CardDto
+
+    String validateCardDto(CardDto cardDto); // Cambiado a CardDto
+
+    String validateDetailsCard(Client client, CardDto cardDto); // Cambiado a CardDto
+
+    String validateColor(Client client, CardColor color, CardType type);
+
+    List<Card> getAllCardsCredits(Client client);
+
+    List<Card> getAllCardsDebits(Client client);
+
+    Card generateCard(CardDto cardDto); // Cambiado a CardDto
+
+    CardDto saveCard(Client client, Card card);
+
+    CardColor getCardColor(String color);
+
+    CardType getCardType(String type);
+}

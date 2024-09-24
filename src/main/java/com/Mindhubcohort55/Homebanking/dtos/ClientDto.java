@@ -1,8 +1,6 @@
 package com.Mindhubcohort55.Homebanking.dtos;
 
-import com.Mindhubcohort55.Homebanking.models.Account;
 import com.Mindhubcohort55.Homebanking.models.Client;
-import jakarta.persistence.SecondaryTable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,14 +55,5 @@ public class ClientDto {
         return cards;
     }
 
-    //    @Override
-//    public String toString() {
-//        return "ClientDto{" +
-//                "id=" + id +
-//                ", firstName='" + firstName + '\'' +
-//                ", lastName='" + lastName + '\'' +
-//                ", email='" + email + '\'' +
-//                ", accounts=" + accounts +
-//                '}';
-//    }
+
 }

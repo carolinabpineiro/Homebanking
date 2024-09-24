@@ -23,7 +23,7 @@ public class Loan {
     @Column(name="payments")
     private List<Integer> payments = new ArrayList<>(); // Lista de pagos asociados al préstamo
 
-    @OneToMany(mappedBy = "loan", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "loan", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ClientLoan> clientLoans = new HashSet<>(); // Conjunto de préstamos asociados a clientes
 
     // Constructores
@@ -76,5 +76,20 @@ public class Loan {
 
     public void setClientLoans(Set<ClientLoan> clientLoans) {
         this.clientLoans = clientLoans;
+    }
+
+    // Método para agregar un ClientLoan
+    public void addClientLoan(ClientLoan clientLoan) {
+        this.clientLoans.add(clientLoan);
+        clientLoan.setLoan(this); // Mantener la relación bidireccional
+    }
+
+    @Override
+    public String toString() {
+        return "Loan{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", maxAmount=" + maxAmount +
+                '}';
     }
 }
