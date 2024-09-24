@@ -1,9 +1,8 @@
-package com.mindhub.homebanking;
+package com.mindhub.homebanking.utilsTest;
 import com.Mindhubcohort55.Homebanking.repositories.AccountRepository;
 import com.Mindhubcohort55.Homebanking.utils.AccountNumberGenerator;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import static org.hamcrest.MatcherAssert.assertThat;
