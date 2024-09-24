@@ -48,6 +48,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
         try {
+            // Validaciones de campos vacíos
             if (loginDto.email().isBlank()) {
                 return new ResponseEntity<>("The Email field must not be empty", HttpStatus.BAD_REQUEST);
             }
@@ -56,6 +57,12 @@ public class AuthController {
                 return new ResponseEntity<>("The Password field must not be empty", HttpStatus.BAD_REQUEST);
             }
 
+            // Validación de longitud de la contraseña
+            if (loginDto.password().length() < 4) {
+                return new ResponseEntity<>("The Password must be at least 4 characters long", HttpStatus.BAD_REQUEST);
+            }
+
+            // Autenticación de credenciales
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginDto.email(), loginDto.password())
             );
@@ -84,6 +91,11 @@ public class AuthController {
 
             if (registerDto.password().isBlank()) {
                 return new ResponseEntity<>("The Password field must not be empty", HttpStatus.BAD_REQUEST);
+            }
+
+            // Validación de longitud de la contraseña
+            if (registerDto.password().length() < 4) {
+                return new ResponseEntity<>("The Password must be at least 4 characters long", HttpStatus.BAD_REQUEST);
             }
 
             if (registerDto.email().isBlank()) {
