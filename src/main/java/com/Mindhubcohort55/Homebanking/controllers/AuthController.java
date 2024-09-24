@@ -92,7 +92,7 @@ public class AuthController {
             // Verificación de existencia de email
             if (clientRepository.existsByEmail(registerDto.email())) {
                 return new ResponseEntity<>("The Email entered is already registered", HttpStatus.FORBIDDEN);
-            }git
+            }
 
             if (registerDto.password().isBlank()) {
                 return new ResponseEntity<>("The Password field must not be empty", HttpStatus.BAD_REQUEST);
